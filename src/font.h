@@ -18,9 +18,8 @@
  */
 #ifndef FONT_H
 #define FONT_H
-
-#include "SDL.h"
-
+#include "opentyr.h"
+#include <stdint.h>
 #include <stdbool.h>
 
 typedef enum
@@ -39,11 +38,11 @@ typedef enum
 }
 FontAlignment;
 
-void draw_font_hv_shadow(SDL_Surface *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value, bool black, int shadow_dist);
-void draw_font_hv_full_shadow(SDL_Surface *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value, bool black, int shadow_dist);
+void draw_font_hv_shadow(uint8_t *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value, bool black, int shadow_dist);
+void draw_font_hv_full_shadow(uint8_t *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value, bool black, int shadow_dist);
 
-void draw_font_hv(SDL_Surface *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value);
-void draw_font_hv_blend(SDL_Surface *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value);
-void draw_font_dark(SDL_Surface *, int x, int y, const char *text, Font, FontAlignment, bool black);
+void draw_font_hv(uint8_t *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value);
+void draw_font_hv_blend(uint8_t *, int x, int y, const char *text, Font, FontAlignment, Uint8 hue, Sint8 value);
+void draw_font_dark(uint8_t *, int x, int y, const char *text, Font, FontAlignment, bool black);
 
 #endif // FONT_H

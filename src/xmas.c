@@ -148,7 +148,8 @@ bool xmas_prompt(void)
 			JE_showVGA();
 			JE_mouseReplace();
 
-			SDL_Delay(16);
+			// FIXME
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -163,7 +164,8 @@ bool xmas_prompt(void)
 
 		bool action = false;
 		bool cancel = false;
-
+// FIXME
+#if 0
 		if (mouseMoved || newmouse)
 		{
 			// Find choice that was hovered or clicked.
@@ -229,7 +231,7 @@ bool xmas_prompt(void)
 				break;
 			}
 		}
-
+#endif
 		if (action || cancel)
 		{
 			fade_black(10);

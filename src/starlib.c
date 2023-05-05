@@ -77,7 +77,7 @@ void JE_starlib_main(void)
 	for (stars = star, i = starlib_MAX_STARS; i > 0; stars++, i--)
 	{
 		/* Make a pointer to the screen... */
-		surf = VGAScreen->pixels;
+		surf = VGAScreen/* ->pixels */;
 
 		/* Calculate the offset to where we wish to draw */
 		off = (stars->lastX)+(stars->lastY)*320;
@@ -152,7 +152,8 @@ void JE_starlib_main(void)
 	if (newkey)
 	{
 		char key = 0;
-
+// FIXME
+#if 0
 		if ((lastkey_mod & (KMOD_CTRL | KMOD_SHIFT | KMOD_ALT | KMOD_GUI)) == KMOD_NONE)
 		{
 			switch (lastkey_scan)
@@ -210,7 +211,7 @@ void JE_starlib_main(void)
 			default: break;
 			}
 		}
-
+#endif
 		switch (toupper(key))
 		{
 			case '+':

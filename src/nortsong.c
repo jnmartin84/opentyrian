@@ -28,7 +28,6 @@
 #include "sndmast.h"
 #include "vga256d.h"
 
-#include "SDL.h"
 
 JE_word frameCountMax;
 
@@ -50,31 +49,34 @@ static Uint32 target2 = 0;
 
 void setDelay(int delay)  // FKA NortSong.frameCount
 {
-	target = SDL_GetTicks() + delay * delayPeriod;
+	target = n64_GetTicks() + delay * delayPeriod;
 }
 
 void setDelay2(int delay)  // FKA NortSong.frameCount2
 {
-	target2 = SDL_GetTicks() + delay * delayPeriod;
+	target2 = n64_GetTicks() + delay * delayPeriod;
 }
 
 Uint32 getDelayTicks(void)  // FKA NortSong.frameCount
 {
-	Sint32 delay = target - SDL_GetTicks();
+	// FIXME
+	Sint32 delay = target - n64_GetTicks();
 	return MAX(0, delay);
 }
 
 Uint32 getDelayTicks2(void)  // FKA NortSong.frameCount2
 {
-	Sint32 delay = target2 - SDL_GetTicks();
+	//FIXME
+	Sint32 delay = target2 - n64_GetTicks();
 	return MAX(0, delay);
 }
 
 void wait_delay(void)
 {
-	Sint32 delay = target - SDL_GetTicks();
+	//FIXME
+	Sint32 delay = target - n64_GetTicks();
 	if (delay > 0)
-		SDL_Delay(delay);
+		n64_Delay(delay);
 }
 
 void service_wait_delay(void)
@@ -82,12 +84,11 @@ void service_wait_delay(void)
 	for (; ; )
 	{
 		service_SDL_events(false);
-
-		Sint32 delay = target - SDL_GetTicks();
+		Sint32 delay = target - n64_GetTicks();
 		if (delay <= 0)
 			return;
 
-		SDL_Delay(MIN(delay, SDL_POLL_INTERVAL));
+		n64_Delay(MIN(delay, SDL_POLL_INTERVAL));
 	}
 }
 
@@ -103,18 +104,18 @@ void wait_delayorinput(void)
 			newkey = false;
 			return;
 		}
-
-		Sint32 delay = target - SDL_GetTicks();
+// FIXME
+		Sint32 delay = target - n64_GetTicks();
 		if (delay <= 0)
 			return;
 
-		SDL_Delay(MIN(delay, SDL_POLL_INTERVAL));
+		n64_Delay(MIN(delay, SDL_POLL_INTERVAL));
 	}
 }
 
 void loadSndFile(bool xmas)
 {
-	FILE *f;
+	int f;
 
 	f = dir_fopen_die(data_dir(), "tyrian.snd", "rb");
 
@@ -130,8 +131,8 @@ void loadSndFile(bool xmas)
 	fread_u32_die(sfxPositions, sfxCount, f);
 
 	// Determine end of last sound.
-	fseek(f, 0, SEEK_END);
-	sfxPositions[sfxCount] = ftell(f);
+	dfs_seek(f, 0, SEEK_END);
+	sfxPositions[sfxCount] = dfs_tell(f);
 
 	// Read samples.
 	for (size_t i = 0; i < sfxCount; ++i)
@@ -142,14 +143,17 @@ void loadSndFile(bool xmas)
 		if (soundSampleCount[i] > UINT16_MAX)
 			goto die;
 
-		free(soundSamples[i]);
+		if(soundSamples[i])
+		{
+			free(soundSamples[i]);
+		}
 		soundSamples[i] = malloc(soundSampleCount[i]);
 
-		fseek(f, sfxPositions[i], SEEK_SET);
+		dfs_seek(f, sfxPositions[i], SEEK_SET);
 		fread_u8_die((Uint8 *)soundSamples[i], soundSampleCount[i], f);
 	}
 
-	fclose(f);
+	dfs_close(f);
 
 	f = dir_fopen_die(data_dir(), xmas ? "voicesc.snd" : "voices.snd", "rb");
 
@@ -165,8 +169,8 @@ void loadSndFile(bool xmas)
 	fread_u32_die(voicePositions, voiceCount, f);
 
 	// Determine end of last sound.
-	fseek(f, 0, SEEK_END);
-	voicePositions[voiceCount] = ftell(f);
+	dfs_seek(f, 0, SEEK_END);
+	voicePositions[voiceCount] = dfs_tell(f);
 
 	for (size_t vi = 0; vi < voiceCount; ++vi)
 	{
@@ -183,62 +187,72 @@ void loadSndFile(bool xmas)
 		if (soundSampleCount[i] > UINT16_MAX)
 			goto die;
 
-		free(soundSamples[i]);
+		if(soundSamples[i])
+		{
+			free(soundSamples[i]);
+		}
 		soundSamples[i] = malloc(soundSampleCount[i]);
 
-		fseek(f, voicePositions[vi], SEEK_SET);
+		dfs_seek(f, voicePositions[vi], SEEK_SET);
 		fread_u8_die((Uint8 *)soundSamples[i], soundSampleCount[i], f);
 	}
 
-	fclose(f);
+	dfs_close(f);
 
 	// Convert samples to output sample format and rate.
+// FIXME
+#if 1
+	//SDL_AudioCVT cvt;
+	//if (SDL_BuildAudioCVT(&cvt, AUDIO_S8, 1, 11025, AUDIO_S16SYS, 1, audioSampleRate) < 0)
+	//{
+	//	fprintf(stderr, "error: Failed to build audio converter: %s\n", SDL_GetError());
 
-	SDL_AudioCVT cvt;
-	if (SDL_BuildAudioCVT(&cvt, AUDIO_S8, 1, 11025, AUDIO_S16SYS, 1, audioSampleRate) < 0)
-	{
-		fprintf(stderr, "error: Failed to build audio converter: %s\n", SDL_GetError());
+	//	for (int i = 0; i < SOUND_COUNT; ++i)
+	//		soundSampleCount[i] = 0;
 
-		for (int i = 0; i < SOUND_COUNT; ++i)
-			soundSampleCount[i] = 0;
-
-		return;
-	}
-
+	//	return;
+	//}
+	Sint16 *cvt_buf;
 	size_t maxSampleSize = 0;
 	for (size_t i = 0; i < SOUND_COUNT; ++i)
+	{
 		maxSampleSize = MAX(maxSampleSize, soundSampleCount[i]);
+	}
 
-	cvt.buf = malloc(maxSampleSize * cvt.len_mult);
+	cvt_buf = malloc(maxSampleSize * 2);
 
 	for (size_t i = 0; i < SOUND_COUNT; ++i)
 	{
-		cvt.len = soundSampleCount[i];
-		memcpy(cvt.buf, soundSamples[i], cvt.len);
+		size_t cvt_len = soundSampleCount[i];
+//		memcpy(cvt_buf, soundSamples[i], cvt_len);
 
-		if (SDL_ConvertAudio(&cvt))
-		{
-			fprintf(stderr, "error: Failed to convert audio: %s\n", SDL_GetError());
-
-			soundSampleCount[i] = 0;
-
-			continue;
-		}
+//		if (SDL_ConvertAudio(&cvt))
+//		{
+//			fprintf(stderr, "error: Failed to convert audio: %s\n", SDL_GetError());
+//
+//			soundSampleCount[i] = 0;
+//
+//			continue;
+//		}
+       for (size_t samp_i = 0; samp_i < cvt_len; samp_i++)
+	   {
+			cvt_buf[samp_i] = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i)*256;
+	   }
 
 		free(soundSamples[i]);
-		soundSamples[i] = malloc(cvt.len_cvt);
+		soundSamples[i] = malloc(cvt_len * 2);
 
-		memcpy(soundSamples[i], cvt.buf, cvt.len_cvt);
-		soundSampleCount[i] = cvt.len_cvt / sizeof (Sint16);
+		memcpy(soundSamples[i], cvt_buf, cvt_len * 2);
+		soundSampleCount[i] = cvt_len;//*2 / sizeof (Sint16);
 	}
 
-	free(cvt.buf);
-
+	free(cvt_buf);
+#endif
 	return;
 
 die:
 	fprintf(stderr, "error: Unexpected data was read from a file.\n");
-	SDL_Quit();
+//	SDL_Quit();
 	exit(EXIT_FAILURE);
 }
 

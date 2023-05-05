@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#include "opentyr.h"
 #include "loudness.h"
 
 #include "file.h"
@@ -28,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define OUTPUT_QUALITY 4  // 44.1 kHz
+#define OUTPUT_QUALITY 1 // 11khz  //22khz  // 4 -> 44.1 kHz
 
 int audioSampleRate = 0;
 
@@ -37,7 +38,7 @@ unsigned int song_playing = 0;
 
 bool audio_disabled = false, music_disabled = false, samples_disabled = false;
 
-static SDL_AudioDeviceID audioDevice = 0;
+//static SDL_AudioDeviceID audioDevice = 0;
 
 static Uint8 musicVolume = 255;
 static Uint8 sampleVolume = 255;
@@ -62,7 +63,7 @@ static int samplesPerLdsUpdateFrac;
 static int samplesUntilLdsUpdate = 0;
 static int samplesUntilLdsUpdateFrac = 0;
 
-static FILE *music_file = NULL;
+static int music_file = -1;//NULL;
 static Uint32 *song_offset;
 static Uint16 song_count = 0;
 
@@ -72,7 +73,7 @@ static size_t channelSampleCount[CHANNEL_COUNT] = { 0 };
 static Uint8 channelVolume[CHANNEL_COUNT];
 #define CHANNEL_VOLUME_LEVELS 8
 
-static void audioCallback(void *userdata, Uint8 *stream, int size);
+void audioCallback(void *userdata, Uint8 *stream, int size);
 
 static void load_song(unsigned int song_num);
 
@@ -81,6 +82,20 @@ bool init_audio(void)
 	if (audio_disabled)
 		return false;
 
+	n64_startAudio();
+	audioSampleRate = SOUND_SAMPLE_RATE;
+
+	samplesPerLdsUpdate = 2 * (audioSampleRate / ldsUpdate2Rate);
+	samplesPerLdsUpdateFrac = 2 * (audioSampleRate % ldsUpdate2Rate);
+
+	volumeFactorTable[0] = 0;
+	for (size_t i = 1; i < 256; ++i)
+		volumeFactorTable[i] = TO_FIXED(powf(10, (255 - i) * (-volumeRange / (20.0f * 255))));
+
+	opl_init();
+
+	return true;
+#if 0
 	SDL_AudioSpec ask, got;
 
 	ask.freq = 11025 * OUTPUT_QUALITY;
@@ -121,14 +136,15 @@ bool init_audio(void)
 	opl_init();
 
 	SDL_PauseAudioDevice(audioDevice, 0); // unpause
-
 	return true;
+#endif
 }
 
-static void audioCallback(void *userdata, Uint8 *stream, int size)
+void audioCallback(void *userdata, Uint8 *stream, int size)
 {
 	(void)userdata;
-
+	//samples_disabled = true;
+	//music_disabled = true;
 	Sint16 *const samples = (Sint16 *)stream;
 	const int samplesCount = size / sizeof (Sint16);
 
@@ -159,7 +175,7 @@ static void audioCallback(void *userdata, Uint8 *stream, int size)
 
 			opl_update(remaining, count);
 
-			remaining += count;
+			remaining += count*2;
 			remainingCount -= count;
 
 			samplesUntilLdsUpdate -= count;
@@ -168,7 +184,10 @@ static void audioCallback(void *userdata, Uint8 *stream, int size)
 	else
 	{
 		for (int i = 0; i < samplesCount; ++i)
-			samples[i] = 0;
+		{
+			samples[(i*2)+0] = 0;
+			samples[(i*2)+1] = 0;
+		}
 	}
 
 	Sint32 musicVolumeFactor = volumeFactorTable[musicVolume];
@@ -184,9 +203,10 @@ static void audioCallback(void *userdata, Uint8 *stream, int size)
 			Sint32 sample = *remaining * musicVolumeFactor;
 
 			sample = FIXED_TO_INT(sample);
-			*remaining = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
 
-			remaining += 1;
+//			remaining += 1;
 			remainingCount -= 1;
 		}
 	}
@@ -198,11 +218,14 @@ static void audioCallback(void *userdata, Uint8 *stream, int size)
 			sampleVolumeFactors[i] = sampleVolumeFactor * (i + 1) / CHANNEL_VOLUME_LEVELS;
 
 		// Mix music and channels
-		Sint16 *remaining = samples;
+		Sint16 *remaining;// = samples;
+		Sint32 sample;
+		size_t next_sample = 0;
 		int remainingCount = samplesCount;
 		while (remainingCount > 0)
 		{
-			Sint32 sample = *remaining * musicVolumeFactor;
+			remaining = &samples[next_sample<<1]; 
+			sample = *remaining * musicVolumeFactor;
 
 			for (size_t i = 0; i < CHANNEL_COUNT; ++i)
 			{
@@ -216,10 +239,12 @@ static void audioCallback(void *userdata, Uint8 *stream, int size)
 			}
 
 			sample = FIXED_TO_INT(sample);
-			*remaining = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
 
-			remaining += 1;
+//			remaining += 2;
 			remainingCount -= 1;
+			next_sample += 1;
 		}
 	}
 }
@@ -228,7 +253,7 @@ void deinit_audio(void)
 {
 	if (audio_disabled)
 		return;
-
+#if 0
 	if (audioDevice != 0)
 	{
 		SDL_PauseAudioDevice(audioDevice, 1); // pause
@@ -241,11 +266,12 @@ void deinit_audio(void)
 	memset(channelSampleCount, 0, sizeof channelSampleCount);
 
 	lds_free();
+#endif	
 }
 
 void load_music(void)  // FKA NortSong.loadSong
 {
-	if (music_file == NULL)
+	if (music_file == -1)
 	{
 		music_file = dir_fopen_die(data_dir(), "music.mus", "rb");
 
@@ -274,93 +300,102 @@ static void load_song(unsigned int song_num)  // FKA NortSong.loadSong
 
 void play_song(unsigned int song_num)  // FKA NortSong.playSong
 {
+
 	if (audio_disabled)
 		return;
-
+#if 1
 	if (song_num != song_playing)
 	{
-		SDL_LockAudioDevice(audioDevice);
+//		SDL_LockAudioDevice(audioDevice);
 
 		music_stopped = true;
 
-		SDL_UnlockAudioDevice(audioDevice);
+//		SDL_UnlockAudioDevice(audioDevice);
 
 		load_song(song_num);
 
 		song_playing = song_num;
 	}
 
-	SDL_LockAudioDevice(audioDevice);
+//	SDL_LockAudioDevice(audioDevice);
 
 	music_stopped = false;
 
-	SDL_UnlockAudioDevice(audioDevice);
+//	SDL_UnlockAudioDevice(audioDevice);
+#endif	
 }
 
 void restart_song(void)  // FKA Player.selectSong(1)
 {
 	if (audio_disabled)
 		return;
-
-	SDL_LockAudioDevice(audioDevice);
+#if 1
+//	SDL_LockAudioDevice(audioDevice);
 
 	lds_rewind();
 
 	music_stopped = false;
 
-	SDL_UnlockAudioDevice(audioDevice);
+//	SDL_UnlockAudioDevice(audioDevice);
+#endif	
 }
 
 void stop_song(void)  // FKA Player.selectSong(0)
 {
 	if (audio_disabled)
 		return;
-
-	SDL_LockAudioDevice(audioDevice);
+#if 1
+//	SDL_LockAudioDevice(audioDevice);
 
 	music_stopped = true;
 
-	SDL_UnlockAudioDevice(audioDevice);
+//	SDL_UnlockAudioDevice(audioDevice);
+#endif
 }
 
 void fade_song(void)  // FKA Player.selectSong($C001)
 {
 	if (audio_disabled)
 		return;
-
-	SDL_LockAudioDevice(audioDevice);
+#if 1
+//	SDL_LockAudioDevice(audioDevice);
 
 	lds_fade(1);
 
-	SDL_UnlockAudioDevice(audioDevice);
+//	SDL_UnlockAudioDevice(audioDevice);
+#endif
 }
 
 void set_volume(Uint8 musicVolume_, Uint8 sampleVolume_)  // FKA NortSong.setVol and Player.setVol
 {
 	if (audio_disabled)
 		return;
-
-	SDL_LockAudioDevice(audioDevice);
+#if 1
+//	SDL_LockAudioDevice(audioDevice);
 
 	musicVolume = musicVolume_;
 	sampleVolume = sampleVolume_;
 
-	SDL_UnlockAudioDevice(audioDevice);
+//	SDL_UnlockAudioDevice(audioDevice);
+#endif
 }
 
 void multiSamplePlay(const Sint16 *samples, size_t sampleCount, Uint8 chan, Uint8 vol)  // FKA Player.multiSamplePlay
 {
+#if 0
 	assert(chan < CHANNEL_COUNT);
 	assert(vol < CHANNEL_VOLUME_LEVELS);
+#endif
 
 	if (audio_disabled || samples_disabled)
 		return;
 
-	SDL_LockAudioDevice(audioDevice);
+//	SDL_LockAudioDevice(audioDevice);
 
 	channelSamples[chan] = samples;
 	channelSampleCount[chan] = sampleCount;
 	channelVolume[chan] = vol;
 
-	SDL_UnlockAudioDevice(audioDevice);
+//	SDL_UnlockAudioDevice(audioDevice);
 }
+

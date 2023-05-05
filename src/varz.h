@@ -252,7 +252,7 @@ extern JE_byte displayTime;
 
 extern bool play_demo, record_demo, stopped_demo;
 extern Uint8 demo_num;
-extern FILE *demo_file;
+extern int demo_file;
 
 extern Uint8 demo_keys;
 extern Uint16 demo_keys_wait;

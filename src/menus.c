@@ -74,7 +74,8 @@ bool gameplaySelect(void)
 		}
 
 		// Restore background and header.
-		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+//		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+		memcpy(VGAScreen, VGAScreen2, (size_t)screenpitch * screenheight);
 
 		// Draw menu items.
 		for (size_t i = 0; i < menuItemsCount; ++i)
@@ -109,7 +110,8 @@ bool gameplaySelect(void)
 		bool mouseMoved = false;
 		do
 		{
-			SDL_Delay(16);
+			// FIXME
+//			SDL_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -142,20 +144,22 @@ bool gameplaySelect(void)
 
 							selectedIndex = i;
 						}
-
+// FIXME
+#if 0
 						if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
 						    lastmouse_x >= xMenuItem && lastmouse_x < xMenuItem + wMenuItem[i] &&
 						    lastmouse_y >= yMenuItem && lastmouse_y < yMenuItem + hMenuItem)
 						{
 							action = true;
 						}
-
+#endif
 						break;
 					}
 				}
 			}
 		}
-
+// FIXME
+#if 0
 		if (newmouse)
 		{
 			if (lastmouse_but == SDL_BUTTON_RIGHT)
@@ -204,7 +208,7 @@ bool gameplaySelect(void)
 				break;
 			}
 		}
-
+#endif
 		if (action)
 		{
 			switch (selectedIndex)
@@ -269,7 +273,8 @@ bool episodeSelect(void)
 		}
 
 		// Restore background and header.
-		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+//		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+		memcpy(VGAScreen, VGAScreen2, (size_t)screenpitch * screenheight);
 
 		// Draw menu items.
 		for (size_t i = 0; i < menuItemsCount; ++i)
@@ -303,7 +308,8 @@ bool episodeSelect(void)
 		bool mouseMoved = false;
 		do
 		{
-			SDL_Delay(16);
+// FIXME
+//			SDL_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -321,6 +327,8 @@ bool episodeSelect(void)
 		bool action = false;
 		bool cancel = false;
 
+// FIXME
+#if 0
 		if (mouseMoved || newmouse)
 		{
 			// Find menu item that was hovered or clicked.
@@ -399,7 +407,7 @@ bool episodeSelect(void)
 				break;
 			}
 		}
-
+#endif
 		if (action)
 		{
 			if (episodeAvail[selectedIndex])
@@ -457,7 +465,8 @@ bool difficultySelect(void)
 		}
 
 		// Restore background and header.
-		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+//		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+		memcpy(VGAScreen, VGAScreen2, (size_t)screenpitch * screenheight);
 
 		// Draw menu items.
 		for (size_t i = 0; i < menuItemsVisibleCount; ++i)
@@ -491,7 +500,8 @@ bool difficultySelect(void)
 		bool mouseMoved = false;
 		do
 		{
-			SDL_Delay(16);
+// FIXME
+//			SDL_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -505,7 +515,8 @@ bool difficultySelect(void)
 		} while (!(newkey || newmouse || mouseMoved));
 
 		// Handle interaction.
-
+// FIXME
+#if 0
 		if (menuItemsVisibleCount == 5)
 		{
 			const SDL_Scancode lordKeys[] = { SDL_SCANCODE_L, SDL_SCANCODE_O, SDL_SCANCODE_R, SDL_SCANCODE_D };
@@ -547,10 +558,11 @@ bool difficultySelect(void)
 			if (menuItemsVisibleCount == 3 && keysactive[SDL_SCANCODE_G])
 				menuItemsVisibleCount = 4;
 		}
-
+#endif
 		bool action = false;
 		bool cancel = false;
-
+// FIXME
+#if 0
 		if (mouseMoved || newmouse)
 		{
 			// Find menu item that was hovered or clicked.
@@ -630,7 +642,7 @@ bool difficultySelect(void)
 				break;
 			}
 		}
-
+#endif
 		if (action)
 		{
 			JE_playSampleNum(S_SELECT);

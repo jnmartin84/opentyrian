@@ -20,10 +20,11 @@
 #define PALETTE_H
 
 #include "opentyr.h"
+#include <libdragon.h>
+//#include "SDL.h"
 
-#include "SDL.h"
-
-typedef SDL_Color Palette[256];
+//typedef SDL_Color Palette[256];
+typedef color_t Palette[256];
 
 extern Palette palettes[];
 extern int palette_count;
@@ -35,14 +36,14 @@ extern Palette colors; // TODO: get rid of this
 void JE_loadPals(void);
 
 void set_palette(Palette colors, unsigned int first_color, unsigned int last_color);
-void set_colors(SDL_Color color, unsigned int first_color, unsigned int last_color);
+void set_colors(color_t color, unsigned int first_color, unsigned int last_color);
 
 void init_step_fade_palette(int diff[256][3], Palette colors, unsigned int first_color, unsigned int last_color);
-void init_step_fade_solid(int diff[256][3], SDL_Color color, unsigned int first_color, unsigned int last_color);
+void init_step_fade_solid(int diff[256][3], color_t color, unsigned int first_color, unsigned int last_color);
 void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, unsigned int last_color);
 
 void fade_palette(Palette colors, int steps, unsigned int first_color, unsigned int last_color);
-void fade_solid(SDL_Color color, int steps, unsigned int first_color, unsigned int last_color);
+void fade_solid(color_t color, int steps, unsigned int first_color, unsigned int last_color);
 
 void fade_black(int steps);
 void fade_white(int steps);

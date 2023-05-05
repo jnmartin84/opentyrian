@@ -18,9 +18,9 @@
  */
 #ifndef FILE_H
 #define FILE_H
-
-#include "SDL_endian.h"
-
+#include <libdragon.h>
+//#include "SDL_endian.h"
+#include "opentyr.h"
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -28,18 +28,18 @@ extern const char *custom_data_dir;
 
 const char *data_dir(void);
 
-FILE *dir_fopen(const char *dir, const char *file, const char *mode);
-FILE *dir_fopen_warn(const char *dir, const char *file, const char *mode);
-FILE *dir_fopen_die(const char *dir, const char *file, const char *mode);
+int dir_fopen(const char *dir, const char *file, const char *mode);
+int dir_fopen_warn(const char *dir, const char *file, const char *mode);
+int dir_fopen_die(const char *dir, const char *file, const char *mode);
 
 bool dir_file_exists(const char *dir, const char *file);
 
-long ftell_eof(FILE *f);
+long ftell_eof(int f);
 
-void fread_die(void *buffer, size_t size, size_t count, FILE *stream);
+void fread_die(void *buffer, size_t size, size_t count, int stream);
 
 // 8-bit fread that dies if read fails
-static inline void fread_bool_die(bool *buffer, FILE *stream)
+static inline void fread_bool_die(bool *buffer, int stream)
 {
 	Uint8 temp;
 	fread_die(&temp, sizeof(Uint8), 1, stream);
@@ -47,134 +47,119 @@ static inline void fread_bool_die(bool *buffer, FILE *stream)
 }
 
 // 8-bit fread
-static inline size_t fread_u8(Uint8 *buffer, size_t count, FILE *stream)
+static inline size_t fread_u8(Uint8 *buffer, size_t count, int stream)
 {
-	return fread(buffer, sizeof(Uint8), count, stream);
+//	return fread(buffer, sizeof(Uint8), count, stream);
+	return dfs_read(buffer, sizeof(Uint8), count, stream);
 }
 
 // 8-bit fread that dies if read fails
-static inline void fread_u8_die(Uint8 *buffer, size_t count, FILE *stream)
+static inline void fread_u8_die(Uint8 *buffer, size_t count, int stream)
 {
 	fread_die(buffer, sizeof(Uint8), count, stream);
 }
 
 // 8-bit fread that dies if read fails
-static inline void fread_s8_die(Sint8 *buffer, size_t count, FILE *stream)
+static inline void fread_s8_die(Sint8 *buffer, size_t count, int stream)
 {
 	fread_die(buffer, sizeof(Sint8), count, stream);
 }
 
 // 16-bit endian-swapping fread that dies if read fails
-static inline void fread_u16_die(Uint16 *buffer, size_t count, FILE *stream)
+static inline void fread_u16_die(Uint16 *buffer, size_t count, int stream)
 {
 	fread_die(buffer, sizeof(Uint16), count, stream);
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	for (size_t i = 0; i < count; ++i)
-		buffer[i] = SDL_Swap16(buffer[i]);
-#endif
+		buffer[i] = SHORT(buffer[i]);
 }
 
 // 16-bit endian-swapping fread that dies if read fails
-static inline void fread_s16_die(Sint16 *buffer, size_t count, FILE *stream)
+static inline void fread_s16_die(Sint16 *buffer, size_t count, int stream)
 {
 	fread_die(buffer, sizeof(Sint16), count, stream);
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	for (size_t i = 0; i < count; ++i)
-		buffer[i] = SDL_Swap16(buffer[i]);
-#endif
+		buffer[i] = SHORT(buffer[i]);
 }
 
 // 32-bit endian-swapping fread that dies if read fails
-static inline void fread_u32_die(Uint32 *buffer, size_t count, FILE *stream)
+static inline void fread_u32_die(Uint32 *buffer, size_t count, int stream)
 {
 	fread_die(buffer, sizeof(Uint32), count, stream);
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	for (size_t i = 0; i < count; ++i)
-		buffer[i] = SDL_Swap32(buffer[i]);
-#endif
+		buffer[i] = LONG(buffer[i]);
 }
 
 // 32-bit endian-swapping fread that dies if read fails
-static inline void fread_s32_die(Sint32 *buffer, size_t count, FILE *stream)
+static inline void fread_s32_die(Sint32 *buffer, size_t count, int stream)
 {
 	fread_die(buffer, sizeof(Sint32), count, stream);
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	for (size_t i = 0; i < count; ++i)
-		buffer[i] = SDL_Swap32(buffer[i]);
-#endif
+		buffer[i] = LONG(buffer[i]);
 }
 
-void fwrite_die(const void *buffer, size_t size, size_t count, FILE *stream);
+void fwrite_die(const void *buffer, size_t size, size_t count, int stream);
 
 // 8-bit fwrite that dies if write fails
-static inline void fwrite_bool_die(const bool *buffer, FILE *stream)
+static inline void fwrite_bool_die(const bool *buffer, int stream)
 {
 	Uint8 temp = *buffer ? 1 : 0;
 	fwrite_die(&temp, sizeof(Uint8), 1, stream);
 }
 
 // 8-bit fwrite
-static inline size_t fwrite_u8(const Uint8 *buffer, size_t count, FILE *stream)
+static inline size_t fwrite_u8(const Uint8 *buffer, size_t count, int stream)
 {
-	return fwrite(buffer, sizeof(Uint8), count, stream);
+	return -1;//return fwrite(buffer, sizeof(Uint8), count, stream);
 }
 
 // 8-bit fwrite that dies if write fails
-static inline void fwrite_u8_die(const Uint8 *buffer, size_t count, FILE *stream)
+static inline void fwrite_u8_die(const Uint8 *buffer, size_t count, int stream)
 {
 	fwrite_die(buffer, sizeof(Uint8), count, stream);
 }
 
 // 8-bit fwrite that dies if write fails
-static inline void fwrite_s8_die(const Sint8 *buffer, size_t count, FILE *stream)
+static inline void fwrite_s8_die(const Sint8 *buffer, size_t count, int stream)
 {
 	fwrite_die(buffer, sizeof(Sint8), count, stream);
 }
 
 // 16-bit endian-swapping fwrite that dies if write fails
-static inline void fwrite_u16_die(const Uint16 *buffer, FILE *stream)
+static inline void fwrite_u16_die(const Uint16 *buffer, int stream)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	Uint16 temp = SDL_Swap16(*buffer);
+	Uint16 temp = SHORT(*buffer);
 	buffer = &temp;
-#endif
 
 	fwrite_die(buffer, sizeof(Uint16), 1, stream);
 }
 
 // 16-bit endian-swapping fwrite that dies if write fails
-static inline void fwrite_s16_die(const Sint16 *buffer, FILE *stream)
+static inline void fwrite_s16_die(const Sint16 *buffer, int stream)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	Sint16 temp = SDL_Swap16(*buffer);
+	Sint16 temp = SHORT(*buffer);
 	buffer = &temp;
-#endif
 
 	fwrite_die(buffer, sizeof(Sint16), 1, stream);
 }
 
 // 32-bit endian-swapping fwrite that dies if write fails
-static inline void fwrite_u32_die(const Uint32 *buffer, FILE *stream)
+static inline void fwrite_u32_die(const Uint32 *buffer, int stream)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	Uint32 temp = SDL_Swap32(*buffer);
+	Uint32 temp = LONG(*buffer);
 	buffer = &temp;
-#endif
 
 	fwrite_die(buffer, sizeof(Uint32), 1, stream);
 }
 
 // 32-bit endian-swapping fwrite that dies if write fails
-static inline void fwrite_s32_die(const Sint32 *buffer, FILE *stream)
+static inline void fwrite_s32_die(const Sint32 *buffer, int stream)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	Sint32 temp = SDL_Swap32(*buffer);
+	Sint32 temp = LONG(*buffer);
 	buffer = &temp;
-#endif
 
 	fwrite_die(buffer, sizeof(Sint32), 1, stream);
 }

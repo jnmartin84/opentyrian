@@ -24,7 +24,6 @@
 #include "palette.h"
 #include "video.h"
 
-#include "SDL.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -32,17 +31,17 @@
 #include <stdio.h>
 #include <string.h>
 
-void JE_pix(SDL_Surface *surface, int x, int y, JE_byte c)
+void JE_pix(uint8_t *surface, int x, int y, JE_byte c)
 {
 	/* Bad things happen if we don't clip */
-	if (x <  surface->pitch && y <  surface->h)
+	if (x <  /*surface->pitch*/screenpitch && y <  /*surface->h*/screenheight)
 	{
-		Uint8 *vga = surface->pixels;
-		vga[y * surface->pitch + x] = c;
+		Uint8 *vga = surface/*->pixels*/;
+		vga[y * /*surface->pitch*/screenpitch + x] = c;
 	}
 }
 
-void JE_pix3(SDL_Surface *surface, int x, int y, JE_byte c)
+void JE_pix3(uint8_t *surface, int x, int y, JE_byte c)
 {
 	/* Originally implemented as several direct accesses */
 	JE_pix(surface, x, y, c);
@@ -52,28 +51,28 @@ void JE_pix3(SDL_Surface *surface, int x, int y, JE_byte c)
 	JE_pix(surface, x, y + 1, c);
 }
 
-void JE_rectangle(SDL_Surface *surface, int a, int b, int c, int d, int e) /* x1, y1, x2, y2, color */
+void JE_rectangle(uint8_t *surface, int a, int b, int c, int d, int e) /* x1, y1, x2, y2, color */
 {
-	if (a < surface->pitch && b < surface->h &&
-	    c < surface->pitch && d < surface->h)
+	if (a < /*surface->pitch*/screenpitch && b < /*surface->h*/screenheight &&
+	    c < /*surface->pitch*/screenpitch && d < /*surface->h*/screenheight)
 	{
-		Uint8 *vga = surface->pixels;
+		Uint8 *vga = surface/*->pixels*/;
 		int i;
 
 		/* Top line */
-		memset(&vga[b * surface->pitch + a], e, c - a + 1);
+		memset(&vga[b * /*surface->pitch*/screenpitch + a], e, c - a + 1);
 
 		/* Bottom line */
-		memset(&vga[d * surface->pitch + a], e, c - a + 1);
+		memset(&vga[d * /*surface->pitch*/screenpitch + a], e, c - a + 1);
 
 		/* Left line */
-		for (i = (b + 1) * surface->pitch + a; i < (d * surface->pitch + a); i += surface->pitch)
+		for (i = (b + 1) * /*surface->pitch*/screenpitch + a; i < (d * /*surface->pitch*/screenpitch + a); i += /*surface->pitch*/screenpitch)
 		{
 			vga[i] = e;
 		}
 
 		/* Right line */
-		for (i = (b + 1) * surface->pitch + c; i < (d * surface->pitch + c); i += surface->pitch)
+		for (i = (b + 1) * /*surface->pitch*/screenpitch + c; i < (d * /*surface->pitch*/screenpitch + c); i += /*surface->pitch*/screenpitch)
 		{
 			vga[i] = e;
 		}
@@ -84,23 +83,24 @@ void JE_rectangle(SDL_Surface *surface, int a, int b, int c, int d, int e) /* x1
 	}
 }
 
-void fill_rectangle_xy(SDL_Surface *surface, int x, int y, int x2, int y2, Uint8 color)
+void fill_rectangle_xy(uint8_t *surface, int x, int y, int x2, int y2, Uint8 color)
 {
-	SDL_Rect rect = { x, y, x2 - x + 1, y2 - y + 1 };
-	SDL_FillRect(surface, &rect, color);
+	// FIXME
+//	SDL_Rect rect = { x, y, x2 - x + 1, y2 - y + 1 };
+//	SDL_FillRect(surface, &rect, color);
 }
 
-void JE_barShade(SDL_Surface *surface, int a, int b, int c, int d) /* x1, y1, x2, y2 */
+void JE_barShade(uint8_t *surface, int a, int b, int c, int d) /* x1, y1, x2, y2 */
 {
-	if (a < surface->pitch && b < surface->h &&
-	    c < surface->pitch && d < surface->h)
+	if (a < /*surface->pitch*/screenpitch && b < /*surface->h*/screenheight &&
+	    c < /*surface->pitch*/screenpitch && d < /*surface->h*/screenheight)
 	{
-		Uint8 *vga = surface->pixels;
+		Uint8 *vga = surface/*->pixels*/;
 		int i, j, width;
 
 		width = c - a + 1;
 
-		for (i = b * surface->pitch + a; i <= d * surface->pitch + a; i += surface->pitch)
+		for (i = b * /*surface->pitch*/screenpitch + a; i <= d * /*surface->pitch*/screenpitch + a; i += /*surface->pitch*/screenpitch)
 		{
 			for (j = 0; j < width; j++)
 			{
@@ -114,17 +114,17 @@ void JE_barShade(SDL_Surface *surface, int a, int b, int c, int d) /* x1, y1, x2
 	}
 }
 
-void JE_barBright(SDL_Surface *surface, int a, int b, int c, int d) /* x1, y1, x2, y2 */
+void JE_barBright(uint8_t *surface, int a, int b, int c, int d) /* x1, y1, x2, y2 */
 {
-	if (a < surface->pitch && b < surface->h &&
-	    c < surface->pitch && d < surface->h)
+	if (a < /*surface->pitch*/screenpitch && b < /*surface->h*/screenheight &&
+	    c < /*surface->pitch*/screenpitch && d < /*surface->h*/screenheight)
 	{
-		Uint8 *vga = surface->pixels;
+		Uint8 *vga = surface/*->pixels*/;
 		int i, j, width;
 
 		width = c-a+1;
 
-		for (i = b * surface->pitch + a; i <= d * surface->pitch + a; i += surface->pitch)
+		for (i = b * /*surface->pitch*/screenpitch + a; i <= d * /*surface->pitch*/screenpitch + a; i += /*surface->pitch*/screenpitch)
 		{
 			for (j = 0; j < width; j++)
 			{
@@ -149,7 +149,7 @@ void JE_barBright(SDL_Surface *surface, int a, int b, int c, int d) /* x1, y1, x
 	}
 }
 
-void draw_segmented_gauge(SDL_Surface *surface, int x, int y, Uint8 color, uint segment_width, uint segment_height, uint segment_value, uint value)
+void draw_segmented_gauge(uint8_t *surface, int x, int y, Uint8 color, uint segment_width, uint segment_height, uint segment_value, uint value)
 {
 	assert(segment_width > 0 && segment_height > 0);
 

@@ -24,7 +24,7 @@
  */
 #ifndef CONFIG_FILE_H
 #define CONFIG_FILE_H
-
+#include <libdragon.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -218,7 +218,7 @@ extern void config_deinit(Config *config);
  * \param[in] file the file handle
  * \return whether parsing succeeded
  */
-extern bool config_parse(Config *config, FILE *file);
+extern bool config_parse(Config *config, int file);
 
 /*!
  * \brief Write a configuration to a file.
@@ -227,7 +227,7 @@ extern bool config_parse(Config *config, FILE *file);
  * \param[in] file the file handle
  * \return void
  */
-extern void config_write(const Config *config, FILE *file);
+extern void config_write(const Config *config, int file);
 
 /* config section accessors/manipulators -- by type, name */
 

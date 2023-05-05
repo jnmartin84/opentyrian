@@ -21,7 +21,7 @@
 #include "opentyr.h"
 #include "varz.h"
 
-#include "SDL.h"
+//#include "SDL.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -33,6 +33,7 @@ const char *custom_data_dir = NULL;
 // finds the Tyrian data directory
 const char *data_dir(void)
 {
+#if 0	
 	const char *const dirs[] =
 	{
 		custom_data_dir,
@@ -51,10 +52,10 @@ const char *data_dir(void)
 		if (dirs[i] == NULL)
 			continue;
 
-		FILE *f = dir_fopen(dirs[i], "tyrian1.lvl", "rb");
-		if (f)
+		int f = dir_fopen(dirs[i], "tyrian1.lvl", "rb");
+		if (f > -1)
 		{
-			fclose(f);
+			dfs_close(f);
 
 			dir = dirs[i];
 			break;
@@ -63,44 +64,51 @@ const char *data_dir(void)
 
 	if (dir == NULL) // data not found
 		dir = "";
-
-	return dir;
+#endif
+	return "";//dir;
 }
 
 // prepend directory and fopen
-FILE *dir_fopen(const char *dir, const char *file, const char *mode)
+int dir_fopen(const char *dir, const char *file, const char *mode)
 {
-	char *path = malloc(strlen(dir) + 1 + strlen(file) + 1);
-	sprintf(path, "%s/%s", dir, file);
+//	char *path = malloc(strlen(dir) + 1 + strlen(file) + 1);
+//printf("trying to open... %s\n", file);
+//printf("\n\n\n");
+//	sprintf(path, "%s/%s", dir, file);
+	int f = dfs_open(file);
+	//fopen(path, mode);
 
-	FILE *f = fopen(path, mode);
-
-	free(path);
+//	free(path);
 
 	return f;
 }
 
 // warn when dir_fopen fails
-FILE *dir_fopen_warn(const char *dir, const char *file, const char *mode)
+int dir_fopen_warn(const char *dir, const char *file, const char *mode)
 {
-	FILE *f = dir_fopen(dir, file, mode);
+	int f = dir_fopen(dir, file, mode);
 
-	if (f == NULL)
-		fprintf(stderr, "warning: failed to open '%s': %s\n", file, strerror(errno));
+//	if (f < 0)
+//		printf("warning: failed to open '%s': %s\n", file, strerror(errno));
+
+//	while(1) {}
 
 	return f;
 }
 
 // die when dir_fopen fails
-FILE *dir_fopen_die(const char *dir, const char *file, const char *mode)
+int dir_fopen_die(const char *dir, const char *file, const char *mode)
 {
-	FILE *f = dir_fopen(dir, file, mode);
-
-	if (f == NULL)
+	//FILE *f 
+	int f = dir_fopen(dir, file, mode);
+//printf("handle %d name %s\n", f, file);
+	if (f < 0) //== NULL)
 	{
-		fprintf(stderr, "error: failed to open '%s': %s\n", file, strerror(errno));
-		fprintf(stderr, "error: One or more of the required Tyrian " TYRIAN_VERSION " data files could not be found.\n"
-		                "       Please read the README file.\n");
+		while(1) {		
+			printf("error: failed to open '%s': %s\n", file, strerror(errno));
+			printf("error: One or more of the required Tyrian " TYRIAN_VERSION " data files could not be found.\n"
+		            "       Please read the README file.\n");
+}
 		JE_tyrianHalt(1);
 	}
 
@@ -110,43 +118,46 @@ FILE *dir_fopen_die(const char *dir, const char *file, const char *mode)
 // check if file can be opened for reading
 bool dir_file_exists(const char *dir, const char *file)
 {
-	FILE *f = dir_fopen(dir, file, "rb");
-	if (f != NULL)
-		fclose(f);
-	return (f != NULL);
+	int f = dir_fopen(dir, file, "rb");
+	if (f > -1)
+		dfs_close(f);
+	return (f > -1);
 }
 
 // returns end-of-file position
-long ftell_eof(FILE *f)
+long ftell_eof(int f)
 {
-	long pos = ftell(f);
+	long pos = dfs_tell(f);
 
-	fseek(f, 0, SEEK_END);
-	long size = ftell(f);
+	dfs_seek(f, 0, SEEK_END);
+	long size = dfs_tell(f);
 
-	fseek(f, pos, SEEK_SET);
+	dfs_seek(f, pos, SEEK_SET);
 
 	return size;
 }
 
-void fread_die(void *buffer, size_t size, size_t count, FILE *stream)
+void fread_die(void *buffer, size_t size, size_t count, int stream)
 {
-	size_t result = fread(buffer, size, count, stream);
-	if (result != count)
+	size_t result = dfs_read(buffer, size, count, stream);
+	if (result != (size*count))
 	{
-		fprintf(stderr, "error: An unexpected problem occurred while reading from a file.\n");
-		SDL_Quit();
+		//printf("\n\n\n\n");
+		//printf("stream %d result %d count %d\n", stream, result, count);
+		printf("error: An unexpected problem occurred while reading from a file.\n");
+		while(1) {}
+		//SDL_Quit();
 		exit(EXIT_FAILURE);
 	}
 }
 
-void fwrite_die(const void *buffer, size_t size, size_t count, FILE *stream)
+void fwrite_die(const void *buffer, size_t size, size_t count, int stream)
 {
-	size_t result = fwrite(buffer, size, count, stream);
+/*	size_t result = fwrite(buffer, size, count, stream);
 	if (result != count)
 	{
 		fprintf(stderr, "error: An unexpected problem occurred while writing to a file.\n");
 		SDL_Quit();
 		exit(EXIT_FAILURE);
-	}
+	}*/
 }

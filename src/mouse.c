@@ -24,11 +24,11 @@
 #include "video.h"
 #include "vga256d.h"
 
-#if defined(TARGET_GP2X) || defined(TARGET_DINGUX)
+//#if defined(TARGET_GP2X) || defined(TARGET_DINGUX)
 bool has_mouse = false;
-#else
-bool has_mouse = true;
-#endif
+//#else
+//bool has_mouse = true;
+//#endif
 bool mouse_has_three_buttons = true;
 
 bool mouseInactive = true;
@@ -46,11 +46,11 @@ static void JE_drawShapeTypeOne(JE_word x, JE_word y, JE_byte *shape)
 	Uint8 *s;   /* screen pointer, 8-bit specific */
 	Uint8 *s_limit; /* buffer boundary */
 
-	s = (Uint8 *)VGAScreen->pixels;
-	s += y * VGAScreen->pitch + x;
+	s = (Uint8 *)VGAScreen;//->pixels;
+	s += y * /* VGAScreen->pitch */ screenpitch + x;
 
-	s_limit = (Uint8 *)VGAScreen->pixels;
-	s_limit += VGAScreen->h * VGAScreen->pitch;
+	s_limit = (Uint8 *)VGAScreen/*->pixels*/;
+	s_limit += /* VGAScreen->h */ screenheight * /* VGAScreen->pitch */ screenpitch;
 
 	for (yloop = 0; yloop < 28; yloop++)
 	{
@@ -62,7 +62,7 @@ static void JE_drawShapeTypeOne(JE_word x, JE_word y, JE_byte *shape)
 			s++; p++;
 		}
 		s -= 24;
-		s += VGAScreen->pitch;
+		s += /* VGAScreen->pitch */ screenpitch;
 	}
 }
 
@@ -73,11 +73,11 @@ static void JE_grabShapeTypeOne(JE_word x, JE_word y, JE_byte *shape)
 	Uint8 *s;   /* screen pointer, 8-bit specific */
 	Uint8 *s_limit; /* buffer boundary */
 
-	s = (Uint8 *)VGAScreen->pixels;
-	s += y * VGAScreen->pitch + x;
+	s = (Uint8 *)VGAScreen/*->pixels*/;
+	s += y * /* VGAScreen->pitch */ screenpitch + x;
 
-	s_limit = (Uint8 *)VGAScreen->pixels;
-	s_limit += VGAScreen->h * VGAScreen->pitch;
+	s_limit = (Uint8 *)VGAScreen/*->pixels*/;
+	s_limit += /* VGAScreen->h */ screenheight * /* VGAScreen->pitch */ screenpitch;
 
 	for (yloop = 0; yloop < 28; yloop++)
 	{
@@ -89,7 +89,7 @@ static void JE_grabShapeTypeOne(JE_word x, JE_word y, JE_byte *shape)
 			s++; p++;
 		}
 		s -= 24;
-		s += VGAScreen->pitch;
+		s += /* VGAScreen->pitch */ screenpitch;
 	}
 }
 

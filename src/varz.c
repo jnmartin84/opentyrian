@@ -213,7 +213,7 @@ JE_byte displayTime;
 /* Demo Stuff */
 bool play_demo = false, record_demo = false, stopped_demo = false;
 Uint8 demo_num = 0;
-FILE *demo_file = NULL;
+int demo_file = -1;//NULL;
 
 Uint8 demo_keys;
 Uint16 demo_keys_wait;
@@ -374,6 +374,8 @@ void JE_getShipInfo(void)
 			player[i].shot_hit_area_y = 14;
 		}
 	}
+
+//	printf("\n\nfinished shipinfo\n\n");
 }
 
 JE_word JE_SGr(JE_word ship, Sprite2_array **ptr)
@@ -389,7 +391,7 @@ JE_word JE_SGr(JE_word ship, Sprite2_array **ptr)
 
 void JE_drawOptions(void)
 {
-	SDL_Surface *temp_surface = VGAScreen;
+	uint8_t *temp_surface = VGAScreen;
 	VGAScreen = VGAScreenSeg;
 
 	Player *this_player = &player[twoPlayerMode ? 1 : 0];
@@ -435,6 +437,7 @@ void JE_drawOptionLevel(void)
 			fill_rectangle_xy(VGAScreenSeg, 268, 127 + (temp - 1) * 6, 269, 127 + 3 + (temp - 1) * 6, 193 + ((player[1].items.sidekick_level - 100) == temp) * 11);
 		}
 	}
+//	printf("end drawoptionlevel\n");
 }
 
 void JE_tyrianHalt(JE_byte code)
@@ -494,7 +497,7 @@ void JE_tyrianHalt(JE_byte code)
 		       "\n");
 	}
 
-	SDL_Quit();
+//	SDL_Quit();
 	exit(code);
 }
 
@@ -1160,21 +1163,21 @@ void JE_drawSP(void)
 			superpixels[i].x += superpixels[i].delta_x;
 			superpixels[i].y += superpixels[i].delta_y;
 
-			if (superpixels[i].x < (unsigned)VGAScreen->w && superpixels[i].y < (unsigned)VGAScreen->h)
+			if (superpixels[i].x < (unsigned)/*VGAScreen->w*/screenwidth && superpixels[i].y < (unsigned)/*VGAScreen->h*/screenheight)
 			{
-				Uint8 *s = (Uint8 *)VGAScreen->pixels; /* screen pointer, 8-bit specific */
-				s += superpixels[i].y * VGAScreen->pitch;
+				Uint8 *s = (Uint8 *)VGAScreen/*->pixels*/; /* screen pointer, 8-bit specific */
+				s += superpixels[i].y * /*VGAScreen->pitch*/screenpitch;
 				s += superpixels[i].x;
 
 				*s = (((*s & 0x0f) + superpixels[i].z) >> 1) + superpixels[i].color;
 				if (superpixels[i].x > 0)
 					*(s - 1) = (((*(s - 1) & 0x0f) + (superpixels[i].z >> 1)) >> 1) + superpixels[i].color;
-				if (superpixels[i].x < VGAScreen->w - 1u)
+				if (superpixels[i].x < /*VGAScreen->w*/screenwidth - 1u)
 					*(s + 1) = (((*(s + 1) & 0x0f) + (superpixels[i].z >> 1)) >> 1) + superpixels[i].color;
 				if (superpixels[i].y > 0)
-					*(s - VGAScreen->pitch) = (((*(s - VGAScreen->pitch) & 0x0f) + (superpixels[i].z >> 1)) >> 1) + superpixels[i].color;
-				if (superpixels[i].y < VGAScreen->h - 1u)
-					*(s + VGAScreen->pitch) = (((*(s + VGAScreen->pitch) & 0x0f) + (superpixels[i].z >> 1)) >> 1) + superpixels[i].color;
+					*(s - /*VGAScreen->pitch*/screenpitch) = (((*(s - /*VGAScreen->pitch*/screenpitch) & 0x0f) + (superpixels[i].z >> 1)) >> 1) + superpixels[i].color;
+				if (superpixels[i].y < /*VGAScreen->h*/screenheight - 1u)
+					*(s + /*VGAScreen->pitch*/screenpitch) = (((*(s + /*VGAScreen->pitch*/screenpitch) & 0x0f) + (superpixels[i].z >> 1)) >> 1) + superpixels[i].color;
 			}
 
 			superpixels[i].z--;

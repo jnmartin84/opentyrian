@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <string.h>
 
+#if 0
 static void nn_32(SDL_Surface *src_surface, SDL_Texture *dst_texture);
 static void nn_16(SDL_Surface *src_surface, SDL_Texture *dst_texture);
 
@@ -38,7 +39,6 @@ static void scale3x_16(SDL_Surface *src_surface, SDL_Texture *dst_texture);
 void hq2x_32(SDL_Surface *src_surface, SDL_Texture *dst_texture);
 void hq3x_32(SDL_Surface *src_surface, SDL_Texture *dst_texture);
 void hq4x_32(SDL_Surface *src_surface, SDL_Texture *dst_texture);
-
 uint scaler;
 
 const struct Scalers scalers[] =
@@ -54,19 +54,20 @@ const struct Scalers scalers[] =
 	{ 4 * vga_width, 4 * vga_height, NULL,       hq4x_32,    "hq4x" },
 };
 const uint scalers_count = COUNTOF(scalers);
+#endif
 
 void set_scaler_by_name(const char *name)
 {
-	for (uint i = 0; i < scalers_count; ++i)
+/*	for (uint i = 0; i < scalers_count; ++i)
 	{
 		if (strcmp(name, scalers[i].name) == 0)
 		{
 			scaler = i;
 			break;
 		}
-	}
+	}*/
 }
-
+#if 0
 void nn_32(SDL_Surface *src_surface, SDL_Texture *dst_texture)
 {
 	Uint8 *src = src_surface->pixels, *src_temp;
@@ -444,3 +445,4 @@ void scale3x_16(SDL_Surface *src_surface, SDL_Texture *dst_texture)
 
 	SDL_UnlockTexture(dst_texture);
 }
+#endif

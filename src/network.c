@@ -175,7 +175,7 @@ bool network_send(int len)
 	last_out_sync++;
 
 	if (network_is_sync())
-		last_out_tick = SDL_GetTicks();
+		last_out_tick = n64_GetTicks();
 
 	return temp;
 }
@@ -193,7 +193,7 @@ static int network_acknowledge(Uint16 sync)
 // activity lately?
 static bool network_is_alive(void)
 {
-	return (SDL_GetTicks() - last_in_tick < NET_TIME_OUT || SDL_GetTicks() - last_state_in_tick < NET_TIME_OUT);
+	return (n64_GetTicks() - last_in_tick < NET_TIME_OUT || n64_GetTicks() - last_state_in_tick < NET_TIME_OUT);
 }
 
 // poll for new packets received, check that connection is alive, resend queued packets if necessary
@@ -213,17 +213,17 @@ int network_check(void)
 
 		// keep-alive
 		static Uint32 keep_alive_tick = 0;
-		if (SDL_GetTicks() - keep_alive_tick > NET_KEEP_ALIVE)
+		if (n64_GetTicks() - keep_alive_tick > NET_KEEP_ALIVE)
 		{
 			network_prepare(PACKET_KEEP_ALIVE);
 			network_send_no_ack(4);
 
-			keep_alive_tick = SDL_GetTicks();
+			keep_alive_tick = n64_GetTicks();
 		}
 	}
 
 	// retry
-	if (packet_out[0] && SDL_GetTicks() - last_out_tick > NET_RETRY)
+	if (packet_out[0] && n64_GetTicks() - last_out_tick > NET_RETRY)
 	{
 		if (!SDLNet_UDP_Send(socket, 0, packet_out[0]))
 		{
@@ -231,7 +231,7 @@ int network_check(void)
 			return -1;
 		}
 
-		last_out_tick = SDL_GetTicks();
+		last_out_tick = n64_GetTicks();
 	}
 
 	switch (SDLNet_UDP_Recv(socket, packet_temp))
@@ -273,7 +273,7 @@ int network_check(void)
 							queue_out_sync++;
 						}
 
-						last_in_tick = SDL_GetTicks();
+						last_in_tick = n64_GetTicks();
 						break;
 
 					case PACKET_CONNECT:
@@ -314,7 +314,7 @@ int network_check(void)
 						// fall through
 
 					case PACKET_KEEP_ALIVE:
-						last_in_tick = SDL_GetTicks();
+						last_in_tick = n64_GetTicks();
 						break;
 
 					case PACKET_QUIT:
@@ -513,13 +513,13 @@ bool network_state_update(void)
 			}
 
 			static Uint32 resend_tick = 0;
-			if (SDL_GetTicks() - last_state_in_tick > NET_RESEND && SDL_GetTicks() - resend_tick > NET_RESEND)
+			if (n64_GetTicks() - last_state_in_tick > NET_RESEND && n64_GetTicks() - resend_tick > NET_RESEND)
 			{
 				SDLNet_Write16(PACKET_STATE_RESEND,    &packet_out_temp->data[0]);
 				SDLNet_Write16(last_state_in_sync - 1, &packet_out_temp->data[2]);
 				network_send_no_ack(4);  // PACKET_RESEND
 
-				resend_tick = SDL_GetTicks();
+				resend_tick = n64_GetTicks();
 			}
 
 			if (network_check() == 0)
@@ -542,7 +542,7 @@ bool network_state_update(void)
 			}
 		}
 
-		last_state_in_tick = SDL_GetTicks();
+		last_state_in_tick = n64_GetTicks();
 	}
 
 	return 1;
@@ -584,7 +584,7 @@ void network_state_reset(void)
 		}
 	}
 
-	last_state_in_tick = SDL_GetTicks();
+	last_state_in_tick = n64_GetTicks();
 }
 
 // attempt to punch through firewall by firing off UDP packets at the opponent
@@ -627,7 +627,7 @@ connect_reset:
 			network_tyrian_halt(0, false);
 
 		// never timeout
-		last_in_tick = SDL_GetTicks();
+		last_in_tick = n64_GetTicks();
 
 		if (packet_in[0] && SDLNet_Read16(&packet_in[0]->data[0]) == PACKET_CONNECT)
 			break;
@@ -678,7 +678,7 @@ connect_again:
 		network_check();
 
 		// maybe opponent didn't get our packet
-		if (SDL_GetTicks() - last_out_tick > NET_RETRY)
+		if (n64_GetTicks() - last_out_tick > NET_RETRY)
 			goto connect_reset;
 
 		SDL_Delay(16);

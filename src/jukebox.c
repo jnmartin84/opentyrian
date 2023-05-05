@@ -85,7 +85,8 @@ void jukebox(void)  // FKA Setup.jukeboxGo
 
 		setDelay(1);
 
-		SDL_FillRect(VGAScreenSeg, NULL, 0);
+//		SDL_FillRect(VGAScreenSeg, NULL, 0);
+		memset(VGAScreenSeg, 0, 320*200);
 
 		// starlib input needs to be rewritten
 		JE_starlib_main();
@@ -102,7 +103,7 @@ void jukebox(void)  // FKA Setup.jukeboxGo
 			else
 				snprintf(buffer, sizeof(buffer), "%d %s", song_playing + 1, musicTitle[song_playing]);
 			
-			const int x = VGAScreen->w / 2;
+			const int x = /*VGAScreen->w*/screenwidth / 2;
 			
 			draw_font_hv(VGAScreen, x, 170, "Press ESC to quit the jukebox.",           small_font, centered, 1, 0);
 			draw_font_hv(VGAScreen, x, 180, "Arrow keys change the song being played.", small_font, centered, 1, 0);
@@ -118,6 +119,8 @@ void jukebox(void)  // FKA Setup.jukeboxGo
 
 		// quit on mouse click
 		Uint16 x, y;
+		// fixme
+#if 0		
 		if (JE_mousePosition(&x, &y) > 0)
 			trigger_quit = true;
 
@@ -181,13 +184,14 @@ void jukebox(void)  // FKA Setup.jukeboxGo
 				break;
 			}
 		}
-		
+#endif		
 		// user wants to quit, start fade-out
 		if (trigger_quit && !quitting)
 		{
 			palette_fade_steps = 15;
 			
-			SDL_Color black = { 0, 0, 0 };
+			color_t black = { 0, 0, 0 };
+
 			init_step_fade_solid(diff, black, 0, 255);
 			
 			quitting = true;

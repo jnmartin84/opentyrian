@@ -27,11 +27,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-void JE_loadPic(SDL_Surface *screen, JE_byte PCXnumber, JE_boolean storepal)
+void JE_loadPic(uint8_t *screen, JE_byte PCXnumber, JE_boolean storepal)
 {
 	PCXnumber--;
 
-	FILE *f = dir_fopen_die(data_dir(), "tyrian.pic", "rb");
+	int f = dir_fopen_die(data_dir(), "tyrian.pic", "rb");
 
 	static bool first = true;
 	if (first)
@@ -48,14 +48,14 @@ void JE_loadPic(SDL_Surface *screen, JE_byte PCXnumber, JE_boolean storepal)
 	unsigned int size = pcxpos[PCXnumber + 1] - pcxpos[PCXnumber];
 	Uint8 *buffer = malloc(size);
 
-	fseek(f, pcxpos[PCXnumber], SEEK_SET);
+	dfs_seek(f, pcxpos[PCXnumber], SEEK_SET);
 	fread_u8_die(buffer, size, f);
-	fclose(f);
+	dfs_close(f);
 
 	Uint8 *p = buffer;
 	Uint8 *s; /* screen pointer, 8-bit specific */
 
-	s = (Uint8 *)screen->pixels;
+	s = (Uint8 *)screen;//->pixels;
 
 	for (int i = 0; i < 320 * 200; )
 	{
@@ -73,7 +73,7 @@ void JE_loadPic(SDL_Surface *screen, JE_byte PCXnumber, JE_boolean storepal)
 		}
 		if (i && (i % 320 == 0))
 		{
-			s += screen->pitch - 320;
+			s += /* screen->pitch */screenpitch - 320;
 		}
 	}
 

@@ -54,7 +54,7 @@
 #include <string.h>
 #include <stdint.h>
 
-inline static void blit_enemy(SDL_Surface *surface, unsigned int i, signed int x_offset, signed int y_offset, signed int sprite_offset);
+inline static void blit_enemy(uint8_t *surface, unsigned int i, signed int x_offset, signed int y_offset, signed int sprite_offset);
 
 boss_bar_t boss_bar[2];
 
@@ -82,9 +82,9 @@ void JE_starShowVGA(void)
 	if (!playerEndLevel && !skipStarShowVGA)
 	{
 
-		s = VGAScreenSeg->pixels;
+		s = VGAScreenSeg/* ->pixels */;
 
-		src = game_screen->pixels;
+		src = game_screen/* ->pixels */;
 		src += 24;
 
 		if (smoothScroll != 0 /*&& thisPlayerNum != 2*/)
@@ -93,17 +93,20 @@ void JE_starShowVGA(void)
 			setDelay(frameCountMax);
 		}
 
+#if 0
 		if (starShowVGASpecialCode == 1)
 		{
-			src += game_screen->pitch * 183;
+			src += /*game_screen->pitch*/screenpitch * 183;
 			for (y = 0; y < 184; y++)
 			{
 				memmove(s, src, 264);
-				s += VGAScreenSeg->pitch;
-				src -= game_screen->pitch;
+				s += /*VGAScreenSeg->pitch*/screenpitch;
+				src -= /*game_screen->pitch*/screenpitch;
 			}
 		}
-		else if (starShowVGASpecialCode == 2 && processorType >= 2)
+		else 
+#endif
+		if (starShowVGASpecialCode == 2)// && processorType >= 2)
 		{
 			lighty = 172 - player[0].y;
 			lightx = 281 - player[0].x;
@@ -134,8 +137,8 @@ void JE_starShowVGA(void)
 						src++;
 					}
 				}
-				s += 56 + VGAScreenSeg->pitch - 320;
-				src += 56 + VGAScreenSeg->pitch - 320;
+				s += 56 + /*VGAScreenSeg->pitch*/screenpitch - 320;
+				src += 56 + /*VGAScreenSeg->pitch*/screenpitch - 320;
 			}
 		}
 		else
@@ -143,8 +146,8 @@ void JE_starShowVGA(void)
 			for (y = 0; y < 184; y++)
 			{
 				memmove(s, src, 264);
-				s += VGAScreenSeg->pitch;
-				src += game_screen->pitch;
+				s += /*VGAScreenSeg->pitch*/screenpitch;
+				src += /*game_screen->pitch*/screenpitch;
 			}
 		}
 		JE_showVGA();
@@ -154,7 +157,7 @@ void JE_starShowVGA(void)
 	skipStarShowVGA = false;
 }
 
-inline static void blit_enemy(SDL_Surface *surface, unsigned int i, signed int x_offset, signed int y_offset, signed int sprite_offset)
+inline static void blit_enemy(uint8_t *surface, unsigned int i, signed int x_offset, signed int y_offset, signed int sprite_offset)
 {
 	if (enemy[i].sprite2s == NULL)
 	{
@@ -624,7 +627,6 @@ void JE_main(void)
 	char buffer[256];
 
 	int lastEnemyOnScreen;
-
 	/* NOTE: BEGIN MAIN PROGRAM HERE AFTER LOADING A GAME OR STARTING A NEW ONE */
 
 	/* ----------- GAME ROUTINES ------------------------------------- */
@@ -665,8 +667,8 @@ start_level:
 	{
 		if (demo_file)
 		{
-			fclose(demo_file);
-			demo_file = NULL;
+			dfs_close(demo_file);
+			demo_file = -1;//NULL;
 		}
 
 		if (play_demo)
@@ -771,8 +773,10 @@ start_level_first:
 	JE_gammaCorrect(&colors, gammaCorrection);
 	fade_palette(colors, 50, 0, 255);
 
-	if (explosionSpriteSheet.data == NULL)
+	if (explosionSpriteSheet.data == NULL) {
 		JE_loadCompShapes(&explosionSpriteSheet, '6');
+	//printf("loaded explosion sprite sheet data\n");
+	}
 
 	/* MAPX will already be set correctly */
 	mapY = 300 - 8;
@@ -1013,10 +1017,10 @@ start_level_first:
 	for (uint i = 0; i < COUNTOF(player); ++i)
 		player[i].exploding_ticks = 0;
 
-	if (isNetworkGame)
-	{
-		JE_loadItemDat();
-	}
+	//if (isNetworkGame)
+	//{
+	//	JE_loadItemDat();
+	//}
 
 	memset(enemyAvail,       1, sizeof(enemyAvail));
 	for (uint i = 0; i < COUNTOF(enemyShotAvail); i++)
@@ -2077,7 +2081,8 @@ draw_player_shot_loop_end:
 	}
 
 	/*-------      DEbug      ---------*/
-	debugTime = SDL_GetTicks();
+	// FIXME
+	debugTime = 0;//n64_GetTicks();
 	tempW = lastmouse_but;
 	tempX = mouse_x;
 	tempY = mouse_y;
@@ -2214,7 +2219,7 @@ draw_player_shot_loop_end:
 			if (skipStarShowVGA)
 				goto level_loop;
 		}
-
+#if 0
 		if (pause_pressed || !windowHasFocus)
 		{
 			pause_pressed = false;
@@ -2224,7 +2229,7 @@ draw_player_shot_loop_end:
 			else
 				JE_pauseGame();
 		}
-
+#endif
 		if (ingamemenu_pressed)
 		{
 			ingamemenu_pressed = false;
@@ -2426,7 +2431,7 @@ new_game:
 	{
 		do
 		{
-			FILE *ep_f = dir_fopen_die(data_dir(), episode_file, "rb");
+			int ep_f = dir_fopen_die(data_dir(), episode_file, "rb");
 
 			jumpSection = false;
 			loadLevelOk = false;
@@ -2449,7 +2454,7 @@ new_game:
 			{
 				if (gameLoaded)
 				{
-					fclose(ep_f);
+					dfs_close(ep_f);
 
 					if (mainLevel == 0)  // if quit itemscreen
 						return;          // back to title screen
@@ -2614,7 +2619,8 @@ new_game:
 
 					case 'L':
 						nextLevel = atoi(s + 9);
-						SDL_strlcpy(levelName, s + 13, 10);
+						// FIXME ?
+						/*SDL_*/strlcpy(levelName, s + 13, 10);
 						levelSong = atoi(s + 22);
 						if (nextLevel == 0)
 						{
@@ -2760,11 +2766,11 @@ new_game:
 					case 'U':
 						if (!constantPlay)
 						{
-							memcpy(VGAScreen2->pixels, VGAScreen->pixels, VGAScreen2->pitch * VGAScreen2->h);
+							memcpy(VGAScreen2/*->pixels*/, VGAScreen/*->pixels*/, /*VGAScreen2->pitch*/screenpitch * /*VGAScreen2->h*/screenheight);
 
 							tempX = atoi(s + 3);
 							JE_loadPic(VGAScreen, tempX, false);
-							memcpy(pic_buffer, VGAScreen->pixels, sizeof(pic_buffer));
+							memcpy(pic_buffer, VGAScreen/*->pixels*/, sizeof(pic_buffer));
 
 							service_SDL_events(true);
 
@@ -2772,8 +2778,8 @@ new_game:
 							{
 								if (!newkey)
 								{
-									vga = VGAScreen->pixels;
-									vga2 = VGAScreen2->pixels;
+									vga = VGAScreen/*->pixels*/;
+									vga2 = VGAScreen2/*->pixels*/;
 									pic = pic_buffer + (199 - z) * 320;
 
 									setDelay(1);
@@ -2787,10 +2793,10 @@ new_game:
 										}
 										else
 										{
-											memcpy(vga, vga2, VGAScreen->pitch);
-											vga2 += VGAScreen->pitch;
+											memcpy(vga, vga2, /*VGAScreen->pitch*/screenpitch);
+											vga2 += /*VGAScreen->pitch*/screenpitch;
 										}
-										vga += VGAScreen->pitch;
+										vga += /*VGAScreen->pitch*/screenpitch;
 									}
 
 									JE_showVGA();
@@ -2804,7 +2810,7 @@ new_game:
 								}
 							}
 
-							memcpy(VGAScreen->pixels, pic_buffer, sizeof(pic_buffer));
+							memcpy(VGAScreen/*->pixels*/, pic_buffer, sizeof(pic_buffer));
 						}
 						break;
 
@@ -2812,19 +2818,19 @@ new_game:
 						if (!constantPlay)
 						{
 							/* TODO: NETWORK */
-							memcpy(VGAScreen2->pixels, VGAScreen->pixels, VGAScreen2->pitch * VGAScreen2->h);
+							memcpy(VGAScreen2/*->pixels*/, VGAScreen/*->pixels*/, /*VGAScreen2->pitch*/screenpitch * /*VGAScreen2->h*/screenheight);
 
 							tempX = atoi(s + 3);
 							JE_loadPic(VGAScreen, tempX, false);
-							memcpy(pic_buffer, VGAScreen->pixels, sizeof(pic_buffer));
+							memcpy(pic_buffer, VGAScreen/*->pixels*/, sizeof(pic_buffer));
 
 							service_SDL_events(true);
 							for (int z = 0; z <= 199; z++)
 							{
 								if (!newkey)
 								{
-									vga = VGAScreen->pixels;
-									vga2 = VGAScreen2->pixels;
+									vga = VGAScreen/*->pixels*/;
+									vga2 = VGAScreen2/*->pixels*/;
 									pic = pic_buffer;
 
 									setDelay(1);
@@ -2833,15 +2839,15 @@ new_game:
 									{
 										if (y <= 199 - z)
 										{
-											memcpy(vga, vga2, VGAScreen->pitch);
-											vga2 += VGAScreen->pitch;
+											memcpy(vga, vga2, /*VGAScreen->pitch*/screenpitch);
+											vga2 += /*VGAScreen->pitch*/screenpitch;
 										}
 										else
 										{
 											memcpy(vga, pic, 320);
 											pic += 320;
 										}
-										vga += VGAScreen->pitch;
+										vga += /*VGAScreen->pitch*/screenpitch;
 									}
 
 									JE_showVGA();
@@ -2855,7 +2861,7 @@ new_game:
 								}
 							}
 
-							memcpy(VGAScreen->pixels, pic_buffer, sizeof(pic_buffer));
+							memcpy(VGAScreen/*->pixels*/, pic_buffer, sizeof(pic_buffer));
 						}
 						break;
 
@@ -2863,11 +2869,11 @@ new_game:
 						if (!constantPlay)
 						{
 							/* TODO: NETWORK */
-							memcpy(VGAScreen2->pixels, VGAScreen->pixels, VGAScreen2->pitch * VGAScreen2->h);
+							memcpy(VGAScreen2/*->pixels*/, VGAScreen/*->pixels*/, /*VGAScreen2->pitch*/screenpitch * /*VGAScreen2->h*/screenheight);
 
 							tempX = atoi(s + 3);
 							JE_loadPic(VGAScreen, tempX, false);
-							memcpy(pic_buffer, VGAScreen->pixels, sizeof(pic_buffer));
+							memcpy(pic_buffer, VGAScreen/*->pixels*/, sizeof(pic_buffer));
 
 							service_SDL_events(true);
 
@@ -2875,8 +2881,8 @@ new_game:
 							{
 								if (!newkey)
 								{
-									vga = VGAScreen->pixels;
-									vga2 = VGAScreen2->pixels;
+									vga = VGAScreen/*->pixels*/;
+									vga2 = VGAScreen2/*->pixels*/;
 									pic = pic_buffer;
 
 									setDelay(1);
@@ -2885,7 +2891,7 @@ new_game:
 									{
 										memcpy(vga, vga2 + z, 319 - z);
 										vga += 320 - z;
-										vga2 += VGAScreen2->pitch;
+										vga2 += /*VGAScreen2->pitch*/screenpitch;
 										memcpy(vga, pic, z + 1);
 										vga += z;
 										pic += 320;
@@ -2902,7 +2908,7 @@ new_game:
 								}
 							}
 
-							memcpy(VGAScreen->pixels, pic_buffer, sizeof(pic_buffer));
+							memcpy(VGAScreen/*->pixels*/, pic_buffer, sizeof(pic_buffer));
 						}
 						break;
 
@@ -3001,7 +3007,7 @@ new_game:
 
 			} while (!(loadLevelOk || jumpSection));
 
-			fclose(ep_f);
+			dfs_close(ep_f);
 
 		} while (!loadLevelOk);
 	}
@@ -3011,8 +3017,8 @@ new_game:
 	else
 		fade_black(50);
 
-	FILE *level_f = dir_fopen_die(data_dir(), levelFile, "rb");
-	fseek(level_f, lvlPos[(lvlFileNum-1) * 2], SEEK_SET);
+	int level_f = dir_fopen_die(data_dir(), levelFile, "rb");
+	dfs_seek(level_f, lvlPos[(lvlFileNum-1) * 2], SEEK_SET);
 
 	JE_char char_mapFile;
 	JE_char char_shapeFile;
@@ -3038,9 +3044,10 @@ new_game:
 		fread_u8_die( &eventRec[x].eventdat4, 1, level_f);
 	}
 	eventRec[x].eventtime = 65500;  /*Not needed but just in case*/
-
+//printf("Level loaded.\n");
 	/*debuginfo('Level loaded.');*/
 
+//printf("Loading Map.\n");
 	/*debuginfo('Loading Map');*/
 
 	/* MAP SHAPE LOOKUP TABLE - Each map is directly after level */
@@ -3049,13 +3056,13 @@ new_game:
 		fread_u16_die(mapSh[temp], sizeof(*mapSh) / sizeof(JE_word), level_f);
 		for (temp2 = 0; temp2 < 128; temp2++)
 		{
-			mapSh[temp][temp2] = SDL_Swap16(mapSh[temp][temp2]);
+			mapSh[temp][temp2] = /*SDL_Swap16*/SHORT(mapSh[temp][temp2]);
 		}
 	}
 
 	/* Read Shapes.DAT */
 	sprintf(tempStr, "shapes%c.dat", tolower((unsigned char)char_shapeFile));
-	FILE *shpFile = dir_fopen_die(data_dir(), tempStr, "rb");
+	int shpFile = dir_fopen_die(data_dir(), tempStr, "rb");
 
 	for (int z = 0; z < 600; z++)
 	{
@@ -3127,7 +3134,7 @@ new_game:
 		}
 	}
 
-	fclose(shpFile);
+	dfs_close(shpFile);
 
 	fread_u8_die(mapBuf, 14 * 300, level_f);
 	bufLoc = 0;              /* MAP NUMBER 1 */
@@ -3162,7 +3169,7 @@ new_game:
 		}
 	}
 
-	fclose(level_f);
+	dfs_close(level_f);
 
 	/* Note: The map data is automatically calculated with the correct mapsh
 	value and then the pointer is calculated using the formula (MAPSH-1)*168.
@@ -3177,7 +3184,7 @@ new_game:
 void networkStartScreen(void)
 {
 	JE_loadPic(VGAScreen, 2, false);
-	memcpy(VGAScreen2->pixels, VGAScreen->pixels, VGAScreen2->pitch * VGAScreen2->h);
+	memcpy(VGAScreen2/*->pixels*/, VGAScreen/*->pixels*/, /*VGAScreen2->pitch*/screenpitch * /*VGAScreen2->h*/screenheight);
 	JE_dString(VGAScreen, JE_fontCenter("Waiting for other player.", SMALL_FONT_SHAPES), 140, "Waiting for other player.", SMALL_FONT_SHAPES);
 	JE_showVGA();
 	fade_palette(colors, 10, 0, 255);
@@ -3210,7 +3217,7 @@ void networkStartScreen(void)
 	}
 	else
 	{
-		memcpy(VGAScreen->pixels, VGAScreen2->pixels, VGAScreen->pitch * VGAScreen->h);
+		memcpy(VGAScreen/*->pixels*/, VGAScreen2/*->pixels*/, /*VGAScreen->pitch*/screenpitch * /*VGAScreen->h*/screenheight);
 		JE_dString(VGAScreen, JE_fontCenter(networkText[4 - 1], SMALL_FONT_SHAPES), 140, networkText[4 - 1], SMALL_FONT_SHAPES);
 		JE_showVGA();
 
@@ -3266,7 +3273,8 @@ bool titleScreen(void)
 		MENU_ITEM_QUIT,
 	};
 
-	SDL_strlcpy(menuText[4], "Setup", sizeof menuText[4]);  // override "Ordering Info"
+// FIXME ?
+	/*SDL_*/strlcpy(menuText[4], "Setup", sizeof menuText[4]);  // override "Ordering Info"
 
 	if (shopSpriteSheet.data == NULL)
 		JE_loadCompShapes(&shopSpriteSheet, '1');  // need mouse pointer sprites
@@ -3276,7 +3284,7 @@ bool titleScreen(void)
 	size_t selectedIndex = MENU_ITEM_NEW_GAME;
 	size_t specialNameProgress[SA_ENGAGE] = { 0 };
 
-	const int xCenter = VGAScreen->w / 2;
+	const int xCenter = /*VGAScreen->w*/screenwidth / 2;
 	const int yMenuItems = 104;
 	const int hMenuItem = 13;
 	int wMenuItem[COUNTOF(menuText)] = { 0 };
@@ -3293,7 +3301,7 @@ bool titleScreen(void)
 
 			if (moveTyrianLogoUp)
 			{
-				memcpy(VGAScreen2->pixels, VGAScreen->pixels, VGAScreen2->pitch * VGAScreen2->h);
+				memcpy(VGAScreen2/*->pixels*/, VGAScreen/*->pixels*/, /*VGAScreen2->pitch*/screenpitch * /*VGAScreen2->h*/screenheight);
 
 				blit_sprite(VGAScreenSeg, 11, 62, PLANET_SHAPES, 146); // tyrian logo
 
@@ -3303,7 +3311,7 @@ bool titleScreen(void)
 				{
 					setDelay(2);
 
-					memcpy(VGAScreen->pixels, VGAScreen2->pixels, VGAScreen->pitch * VGAScreen->h);
+					memcpy(VGAScreen/*->pixels*/, VGAScreen2/*->pixels*/, /*VGAScreen->pitch*/screenpitch * /*VGAScreen->h*/screenheight);
 
 					blit_sprite(VGAScreenSeg, 11, y, PLANET_SHAPES, 146); // tyrian logo
 
@@ -3337,7 +3345,7 @@ bool titleScreen(void)
 				draw_font_hv(VGAScreen, x,     y,     menuText[i], normal_font, left_aligned, 15, -3);
 			}
 
-			memcpy(VGAScreen2->pixels, VGAScreen->pixels, VGAScreen2->pitch * VGAScreen2->h);
+			memcpy(VGAScreen2/*->pixels*/, VGAScreen/*->pixels*/, /*VGAScreen2->pitch*/screenpitch * /*VGAScreen2->h*/screenheight);
 
 			mouseCursor = MOUSE_POINTER_NORMAL;
 
@@ -3347,24 +3355,26 @@ bool titleScreen(void)
 			restart = false;
 		}
 
-		memcpy(VGAScreen->pixels, VGAScreen2->pixels, VGAScreen->pitch * VGAScreen->h);
+		memcpy(VGAScreen/*->pixels*/, VGAScreen2/*->pixels*/, /*VGAScreen->pitch*/screenpitch * /*VGAScreen->h*/screenheight);
 
 		// Highlight selected menu item.
-		draw_font_hv(VGAScreen, VGAScreen->w / 2, yMenuItems + hMenuItem * selectedIndex, menuText[selectedIndex], normal_font, centered, 15, -1);
+		draw_font_hv(VGAScreen, /*VGAScreen->w*/screenwidth / 2, yMenuItems + hMenuItem * selectedIndex, menuText[selectedIndex], normal_font, centered, 15, -1);
 
 		service_SDL_events(true);
 
 		JE_mouseStartFilter(0xF0);
 		JE_showVGA();
 		JE_mouseReplace();
-
-		const Uint32 idleStartTick = SDL_GetTicks();
+// FIXME
+		const Uint32 idleStartTick = 0;//n64_GetTicks();
 
 		bool mouseMoved = false;
 		do
 		{
+
 			// Play demo after idle for 30 seconds.
-			if (SDL_GetTicks() - idleStartTick > 30000)
+			// FIXME
+			if (/*n64_GetTicks() -*/ idleStartTick > 30000)
 			{
 				fade_black(15);
 
@@ -3372,7 +3382,8 @@ bool titleScreen(void)
 				return true;
 			}
 
-			SDL_Delay(16);
+// FIXME
+//			SDL_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -3405,20 +3416,22 @@ bool titleScreen(void)
 
 							selectedIndex = i;
 						}
-
+// FIXME
+#if 0
 						if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
 						    lastmouse_x >= xMenuItem && lastmouse_x < xMenuItem + wMenuItem[i] &&
 						    lastmouse_y >= yMenuItem && lastmouse_y < yMenuItem + hMenuItem)
 						{
 							action = true;
 						}
-
+#endif
 						break;
 					}
 				}
 			}
 		}
-
+// FIXME
+#if 0
 		if (newmouse)
 		{
 			if (lastmouse_but == SDL_BUTTON_RIGHT)
@@ -3466,7 +3479,7 @@ bool titleScreen(void)
 				break;
 			}
 		}
-
+#endif
 		if (new_text)
 		{
 			for (size_t ti = 0U; last_text[ti] != '\0'; ++ti)
@@ -3498,7 +3511,7 @@ bool titleScreen(void)
 							JE_playSampleNum(V_DATA_CUBE);
 
 							JE_whoa();
-							set_colors((SDL_Color) { 0, 0, 0 }, 0, 255);
+							set_colors((color_t) { 0, 0, 0 }, 0, 255);
 
 							newSuperTyrianGame();
 							return true;
@@ -3688,7 +3701,8 @@ void newSuperTyrianGame(void)
 {
 	/* SuperTyrian */
 
-	initialDifficulty = keysactive[SDL_SCANCODE_SCROLLLOCK] ? DIFFICULTY_SUICIDE : DIFFICULTY_ZINGLON;
+	// FIXME
+	initialDifficulty = /*keysactive[SDL_SCANCODE_SCROLLLOCK] ? DIFFICULTY_SUICIDE :*/ DIFFICULTY_ZINGLON;
 
 	JE_clr256(VGAScreen);
 	JE_outText(VGAScreen, 10, 10, "Cheat codes have been disabled.", 15, 4);
@@ -3733,7 +3747,8 @@ void intro_logos(void)
 {
 	moveTyrianLogoUp = true;
 
-	SDL_FillRect(VGAScreen, NULL, 0);
+//	SDL_FillRect(VGAScreen, NULL, 0);
+	memset(VGAScreen, 0, 320*200);
 
 	fade_white(25);
 
@@ -4314,7 +4329,7 @@ void JE_eventSystem(void)
 				{
 					if (newEnemyShapeTables[i] > 0)
 					{
-						assert(newEnemyShapeTables[i] <= COUNTOF(shapeFile));
+						//assert(newEnemyShapeTables[i] <= COUNTOF(shapeFile));
 						JE_loadCompShapes(&enemySpriteSheets[i], shapeFile[newEnemyShapeTables[i] - 1]);
 					}
 					else
@@ -5112,28 +5127,28 @@ void JE_whoa(void)
 	 * way to get vgascreen as one of the temp buffers), but it's only called
 	 * once so don't worry about it. */
 
-	TempScreen1  = game_screen->pixels;
-	TempScreen2  = VGAScreen2->pixels;
+	TempScreen1  = game_screen/* ->pixels */;
+	TempScreen2  = VGAScreen2/* ->pixels */;
 
-	screenSize   = VGAScreenSeg->h * VGAScreenSeg->pitch;
-	topBorder    = VGAScreenSeg->pitch * 4; /* Seems an arbitrary number of lines */
-	bottomBorder = VGAScreenSeg->pitch * 7;
+	screenSize   = /*VGAScreenSeg->h*/screenheight * /*VGAScreenSeg->pitch*/screenpitch;
+	topBorder    = /*VGAScreenSeg->pitch*/screenpitch * 4; /* Seems an arbitrary number of lines */
+	bottomBorder = /*VGAScreenSeg->pitch*/screenpitch * 7;
 
 	/* Okay, one disadvantage to using other screens as temp buffers: they
 	 * need to be the right size.  I doubt they'll ever be anything but 320x200,
 	 * but just in case, these asserts will clue in whoever stumbles across
 	 * the problem.  You can fix it with the stack or malloc. */
-	assert((unsigned)VGAScreen2->h  * VGAScreen2->pitch >= screenSize &&
-	       (unsigned)game_screen->h * game_screen->pitch >= screenSize);
+//	assert((unsigned)/*VGAScreen2->h*/screenheight  * /*VGAScreen2->pitch*/screenpitch >= screenSize &&
+//	       (unsigned)game_screen->h * /*game_screen->pitch*/screenpitch >= screenSize);
 
 	/* Clear the top and bottom borders.  We don't want to process
 	 * them and we don't want to draw them. */
-	memset((Uint8 *)VGAScreenSeg->pixels, 0, topBorder);
-	memset((Uint8 *)VGAScreenSeg->pixels + screenSize - bottomBorder, 0, bottomBorder);
+	memset((Uint8 *)VGAScreenSeg/*->pixels*/, 0, topBorder);
+	memset((Uint8 *)VGAScreenSeg/*->pixels*/ + screenSize - bottomBorder, 0, bottomBorder);
 
 	/* Copy our test subject to one of the temporary buffers.  Blank the other */
 	memset(TempScreen1, 0, screenSize);
-	memcpy(TempScreen2, VGAScreenSeg->pixels, VGAScreenSeg->h * VGAScreenSeg->pitch);
+	memcpy(TempScreen2, VGAScreenSeg/*->pixels*/, /*VGAScreenSeg->h*/screenheight * /*VGAScreenSeg->pitch*/screenpitch);
 
 	service_SDL_events(true);
 	timer = 300; /* About 300 rounds is enough to make the screen mostly black */
@@ -5149,16 +5164,17 @@ void JE_whoa(void)
 		{
 			offset = j + i/8192 - 4;
 			color = (TempScreen2[offset                    ] * 12 +
-			         TempScreen1[offset-VGAScreenSeg->pitch]      +
+			         TempScreen1[offset-/*VGAScreenSeg->pitch*/screenpitch]      +
 			         TempScreen1[offset-1                  ]      +
 			         TempScreen1[offset+1                  ]      +
-			         TempScreen1[offset+VGAScreenSeg->pitch]) / 16;
+			         TempScreen1[offset+/*VGAScreenSeg->pitch*/screenpitch]) / 16;
 
 			TempScreen1[j] = color;
 		}
 
 		/* Now copy that mess to the buffer. */
-		memcpy((Uint8 *)VGAScreenSeg->pixels + topBorder, TempScreen1 + topBorder, screenSize - bottomBorder);
+//		memcpy((Uint8 *)VGAScreenSeg/*->pixels*/ + topBorder, TempScreen1 + topBorder, screenSize - bottomBorder);
+		memcpy((Uint8 *)VGAScreenSeg + topBorder, TempScreen1 + topBorder, screenSize - bottomBorder);
 
 		JE_showVGA();
 

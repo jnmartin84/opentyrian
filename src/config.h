@@ -22,7 +22,7 @@
 #include "opentyr.h"
 #include "config_file.h"
 
-#include "SDL.h"
+//#include "SDL.h"
 
 #include <stdio.h>
 
@@ -68,7 +68,7 @@ enum
 
 typedef JE_byte DosKeySettings[8];  // fka KeySettingType
 
-typedef SDL_Scancode KeySettings[8];
+typedef /*SDL_Scancode*/uint8_t KeySettings[8];
 
 typedef JE_byte JE_PItemsType[12]; /* [1..12] */
 

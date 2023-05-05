@@ -19,10 +19,18 @@
 #ifndef OPENTYR_H
 #define OPENTYR_H
 
-#include "SDL_types.h"
+//#include "SDL_types.h"
 
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
+
+
+#define SHORT(x)	((int16_t)(((uint16_t)(x)>>8)|((uint16_t)(x)<<8))) 
+#define LONG(x)     ((int32_t)((((uint32_t)(x)>>24)&0xff) | \
+					(((uint32_t)(x)<<8)&0xff0000) | \
+					(((uint32_t)(x)>>8)&0xff00) | \
+					(((uint32_t)(x)<<24))))
 
 #define COUNTOF(x) ((unsigned)(sizeof(x) / sizeof *(x)))  // use only on arrays!
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -41,6 +49,40 @@
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+/**
+ * \brief A signed 8-bit integer type.
+ */
+typedef int8_t Sint8;
+/**
+ * \brief An unsigned 8-bit integer type.
+ */
+typedef uint8_t Uint8;
+/**
+ * \brief A signed 16-bit integer type.
+ */
+typedef int16_t Sint16;
+/**
+ * \brief An unsigned 16-bit integer type.
+ */
+typedef uint16_t Uint16;
+/**
+ * \brief A signed 32-bit integer type.
+ */
+typedef int32_t Sint32;
+/**
+ * \brief An unsigned 32-bit integer type.
+ */
+typedef uint32_t Uint32;
+
+/**
+ * \brief A signed 64-bit integer type.
+ */
+typedef int64_t Sint64;
+/**
+ * \brief An unsigned 64-bit integer type.
+ */
+typedef uint64_t Uint64;
+
 // Pascal types, yuck.
 typedef Sint32 JE_longint;
 typedef Sint16 JE_integer;
@@ -57,5 +99,11 @@ extern const char *opentyrian_str;
 extern const char *opentyrian_version;
 
 void setupMenu(void);
+#define SOUND_SAMPLE_RATE 11025
+//11025
+#define SAMPLE_DATA_BYTES 2
 
+#define STEREO_MUL 2
+#define NUM_SAMPLES 256
+#define NUM_BYTES_IN_SAMPLE_BUFFER (NUM_SAMPLES * SAMPLE_DATA_BYTES * STEREO_MUL)
 #endif /* OPENTYR_H */

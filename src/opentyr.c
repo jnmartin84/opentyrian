@@ -48,20 +48,20 @@
 #include "video_scale.h"
 #include "xmas.h"
 
-#include "SDL.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
+#include "regsinternal.h"
 const char *opentyrian_str = "OpenTyrian";
 const char *opentyrian_version = OPENTYRIAN_VERSION;
 
+
 static size_t getDisplayPickerItemsCount(void)
 {
-	return 1 + (size_t)SDL_GetNumVideoDisplays();
+	return 1;// + (size_t)SDL_GetNumVideoDisplays();
 }
 
 static const char *getDisplayPickerItem(size_t i, char *buffer, size_t bufferSize)
@@ -75,19 +75,19 @@ static const char *getDisplayPickerItem(size_t i, char *buffer, size_t bufferSiz
 
 static size_t getScalerPickerItemsCount(void)
 {
-	return (size_t)scalers_count;
+	return 0;//(size_t)scalers_count;
 }
 
 static const char *getScalerPickerItem(size_t i, char *buffer, size_t bufferSize)
 {
 	(void)buffer, (void)bufferSize;
 
-	return scalers[i].name;
+	return "";//scalers[i].name;
 }
 
 static size_t getScalingModePickerItemsCount(void)
 {
-	return (size_t)ScalingMode_MAX;
+	return 0;//(size_t)ScalingMode_MAX;
 }
 
 static const char *getScalingModePickerItem(size_t i, char *buffer, size_t bufferSize)
@@ -107,9 +107,9 @@ void setupMenu(void)
 		MENU_ITEM_SOUND,
 		MENU_ITEM_JUKEBOX,
 		MENU_ITEM_DESTRUCT,
-		MENU_ITEM_DISPLAY,
-		MENU_ITEM_SCALER,
-		MENU_ITEM_SCALING_MODE,
+//		MENU_ITEM_DISPLAY,
+//		MENU_ITEM_SCALER,
+//		MENU_ITEM_SCALING_MODE,
 		MENU_ITEM_MUSIC_VOLUME,
 		MENU_ITEM_SOUND_VOLUME,
 	} MenuItemId;
@@ -152,9 +152,9 @@ void setupMenu(void)
 		[MENU_GRAPHICS] = {
 			.header = "Graphics",
 			.items = {
-				{ MENU_ITEM_DISPLAY, "Display:", "Change the display mode.", getDisplayPickerItemsCount, getDisplayPickerItem },
-				{ MENU_ITEM_SCALER, "Scaler:", "Change the pixel art scaling algorithm.", getScalerPickerItemsCount, getScalerPickerItem },
-				{ MENU_ITEM_SCALING_MODE, "Scaling Mode:", "Change the scaling mode.", getScalingModePickerItemsCount, getScalingModePickerItem },
+				//{ MENU_ITEM_DISPLAY, "Display:", "Change the display mode.", getDisplayPickerItemsCount, getDisplayPickerItem },
+				//{ MENU_ITEM_SCALER, "Scaler:", "Change the pixel art scaling algorithm.", getScalerPickerItemsCount, getScalerPickerItem },
+				//{ MENU_ITEM_SCALING_MODE, "Scaling Mode:", "Change the scaling mode.", getScalingModePickerItemsCount, getScalingModePickerItem },
 				{ MENU_ITEM_DONE, "Done", "Return to the previous menu." },
 				{ -1 }
 			},
@@ -204,7 +204,8 @@ void setupMenu(void)
 		}
 
 		// Restore background.
-		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+//		memcpy(VGAScreen->pixels, VGAScreen2->pixels, (size_t)VGAScreen->pitch * VGAScreen->h);
+		memcpy(VGAScreen, VGAScreen2, (size_t)screenpitch * screenheight);
 
 		const Menu *menu = &menus[currentMenu];
 
@@ -242,6 +243,7 @@ void setupMenu(void)
 
 			switch (menuItem->id)
 			{
+#if 0
 			case MENU_ITEM_DISPLAY:;
 				const char *value = "Window";
 				if (fullscreen_display >= 0)
@@ -260,7 +262,7 @@ void setupMenu(void)
 			case MENU_ITEM_SCALING_MODE:
 				draw_font_hv_shadow(VGAScreen, xMenuItemValue, y, scaling_mode_names[scaling_mode], normal_font, left_aligned, 15, -3 + (selected ? 2 : 0) + (disabled ? -4 : 0), false, 2);
 				break;
-
+#endif
 			case MENU_ITEM_MUSIC_VOLUME:
 				JE_barDrawShadow(VGAScreen, xMenuItemValue, y, 1, music_disabled ? 170 : 174, (tyrMusicVolume + 4) / 8, 2, 10);
 				JE_rectangle(VGAScreen, xMenuItemValue - 2, y - 2, xMenuItemValue + 96, y + 11, 242);
@@ -325,7 +327,8 @@ void setupMenu(void)
 		int oldFullscreenDisplay = fullscreen_display;
 		do
 		{
-			SDL_Delay(16);
+			// fixme
+//			SDL_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -358,7 +361,8 @@ void setupMenu(void)
 
 								*selectedMenuItemIndex = i;
 							}
-
+// FIXME
+#if 0
 							if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
 							    lastmouse_y >= yMenuItem && lastmouse_y < yMenuItem + hMenuItem)
 							{
@@ -405,13 +409,14 @@ void setupMenu(void)
 									}
 								}
 							}
-
+#endif
 							break;
 						}
 					}
 				}
 			}
-
+// FIXME			
+#if 0
 			if (newmouse)
 			{
 				if (lastmouse_but == SDL_BUTTON_RIGHT)
@@ -506,7 +511,7 @@ void setupMenu(void)
 					break;
 				}
 			}
-
+#endif
 			if (action)
 			{
 				const MenuItemId selectedMenuItemId = menuItems[*selectedMenuItemIndex].id;
@@ -560,6 +565,7 @@ void setupMenu(void)
 					restart = true;
 					break;
 				}
+#if 0
 				case MENU_ITEM_DISPLAY:
 				{
 					JE_playSampleNum(S_CLICK);
@@ -584,6 +590,7 @@ void setupMenu(void)
 					pickerSelectedIndex = scaling_mode;
 					break;
 				}
+#endif
 				case MENU_ITEM_MUSIC_VOLUME:
 				{
 					JE_playSampleNum(S_CLICK);
@@ -639,7 +646,8 @@ void setupMenu(void)
 
 								pickerSelectedIndex = i;
 							}
-
+// FIXME
+#if 0
 							// Act on picker item.
 							if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
 							    lastmouse_x >= xMenuItemValue && lastmouse_y < xMenuItemValue + wMenuItemName &&
@@ -647,11 +655,13 @@ void setupMenu(void)
 							{
 								action = true;
 							}
+#endif
 						}
 					}
 				}
 			}
-
+// FIXME
+#if 0
 			if (newmouse)
 			{
 				if (lastmouse_but == SDL_BUTTON_RIGHT)
@@ -704,13 +714,14 @@ void setupMenu(void)
 					break;
 				}
 			}
-
+#endif
 			if (action)
 			{
 				JE_playSampleNum(S_CLICK);
 
 				switch (selectedMenuItem->id)
 				{
+#if 0
 				case MENU_ITEM_DISPLAY:
 				{
 					if ((int)pickerSelectedIndex - 1 != fullscreen_display)
@@ -735,6 +746,7 @@ void setupMenu(void)
 					scaling_mode = pickerSelectedIndex;
 					break;
 				}
+#endif
 				default:
 					break;
 				}
@@ -744,9 +756,92 @@ void setupMenu(void)
 		}
 	}
 }
+extern void *__safe_buffer[];
+static volatile uint64_t timekeeping = 0;
+
+void tickercb(int o) { //, int a, int b, int c) {
+	timekeeping+=17;
+}
+
+uint32_t n64_GetTicks() {
+	// 1 tick == 1 ms
+	return (timekeeping);
+}
+
+__attribute__ ((optimize(0))) void n64_Delay(uint32_t duration)
+{
+	// everything is single millseconds now
+	const uint64_t start = timekeeping;
+	const uint64_t durationtk = duration;
+	while ( ((timekeeping) - start) < durationtk ) {
+		continue;
+	}
+}
+
+volatile struct AI_regs_s *AI_regs = (struct AI_regs_s *)0xA4500000;
+#define AI_STATUS_FULL  ( 1 << 31 )
+static int16_t __attribute__((aligned(8))) pcmout1[NUM_SAMPLES*STEREO_MUL] = {0};
+static int16_t __attribute__((aligned(8))) pcmout2[NUM_SAMPLES*STEREO_MUL] = {0};
+int pcmflip = 0;
+int16_t* pcmout[2] = {pcmout1,pcmout2};
+int16_t* pcmbuf = pcmout1;
+extern void audioCallback(void *userdata, Uint8 *stream, int size);
+void the_audio_callback(int o) { //, int a, int b, int c) {
+	if(!(AI_regs->status & AI_STATUS_FULL)) {
+
+		audioCallback(NULL, pcmbuf, NUM_BYTES_IN_SAMPLE_BUFFER/2);
+
+		AI_regs->address = (volatile void *)pcmbuf;
+		AI_regs->length = NUM_BYTES_IN_SAMPLE_BUFFER;
+		AI_regs->control = 1;
+		pcmflip ^= 1;
+		pcmbuf = pcmout[pcmflip];
+	};
+}
+
+
+void n64_startAudio(void)
+{
+	audio_init(SOUND_SAMPLE_RATE, 0);
+	pcmout[0] = pcmout1;
+	pcmout[1] = pcmout2;
+	pcmbuf = pcmout[pcmflip];
+
+	/* timer_link_t* audio_timer = */
+	new_timer(
+		// double the number of times per second that samples get generated
+		// to smooth out clicks and pops and allow for the flag to clear
+		// for writing more sample data to AI
+		TIMER_TICKS(7500),//62,//820312*3,
+		TF_CONTINUOUS,
+		the_audio_callback);
+}
 
 int main(int argc, char *argv[])
 {
+    console_init();
+    console_set_render_mode(RENDER_AUTOMATIC);
+    if (dfs_init( DFS_DEFAULT_LOCATION ) != DFS_ESUCCESS)
+    {
+        printf("Could not initialize filesystem!\n");
+        while(1);
+    }
+    controller_init();
+
+    // center joystick...
+    controller_scan();
+    struct controller_data keys_pressed = get_keys_down();
+    struct SI_condat pressed = keys_pressed.c[0];
+	timer_init();
+	timekeeping = 0;
+	/* timer_link_t* tick_timer = */
+	new_timer(
+	// 1 millisecond tics
+		TIMER_TICKS(17000),
+		TF_CONTINUOUS,
+		tickercb
+	);
+
 	mt_srand(time(NULL));
 
 	printf("\nWelcome to... >> %s %s <<\n\n", opentyrian_str, opentyrian_version);
@@ -757,33 +852,40 @@ int main(int argc, char *argv[])
 	printf("This is free software, and you are welcome to redistribute it\n");
 	printf("under certain conditions.  See the file COPYING for details.\n\n");
 
+#if 0
 	if (SDL_Init(0))
 	{
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());
 		return -1;
 	}
-
+#endif
 	JE_loadConfiguration();
 
-	xmas = xmas_time();  // arg handler may override
+	xmas = false;//xmas_time();  // arg handler may override
 
-	JE_paramCheck(argc, argv);
-
+//	JE_paramCheck(argc, argv);
+//printf("...\n");
 	JE_scanForEpisodes();
+//printf("...\n");
 
 	init_video();
+//printf("...\n");
 	init_keyboard();
+//printf("...\n");
 	init_joysticks();
-	printf("assuming mouse detected\n"); // SDL can't tell us if there isn't one
-
+//printf("...\n");
+//	printf("assuming mouse detected\n"); // SDL can't tell us if there isn't one
+#if 0
 	if (xmas && (!dir_file_exists(data_dir(), "tyrianc.shp") || !dir_file_exists(data_dir(), "voicesc.snd")))
 	{
 		xmas = false;
 
 		fprintf(stderr, "warning: Christmas is missing.\n");
 	}
-
+#endif
 	JE_loadPals();
+//printf("JE_loadPals\n");
+
 	JE_loadMainShapeTables(xmas ? "tyrianc.shp" : "tyrian.shp");
 
 	if (xmas && !xmas_prompt())
@@ -799,6 +901,7 @@ int main(int argc, char *argv[])
 	smoothScroll = true;
 	loadDestruct = false;
 
+#if 1
 	if (!audio_disabled)
 	{
 		printf("initializing SDL audio...\n");
@@ -810,6 +913,7 @@ int main(int argc, char *argv[])
 		loadSndFile(xmas);
 	}
 	else
+#endif
 	{
 		printf("audio disabled\n");
 	}
@@ -845,7 +949,7 @@ int main(int argc, char *argv[])
 		JE_initPlayerData();
 		JE_sortHighScores();
 
-		play_demo = false;
+		play_demo = true;
 		stopped_demo = false;
 
 		gameLoaded = false;
@@ -858,6 +962,7 @@ int main(int argc, char *argv[])
 		}
 		else
 #endif
+#if 0
 		{
 			if (!titleScreen())
 			{
@@ -873,7 +978,13 @@ int main(int argc, char *argv[])
 			loadDestruct = false;
 		}
 		else
+#endif
 		{
+			    console_clear();
+    console_close();
+memset((uint16_t *)(__safe_buffer[0]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
+    memset((uint16_t *)(__safe_buffer[1]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
+
 			JE_main();
 
 			if (trentWin)

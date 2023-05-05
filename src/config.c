@@ -34,12 +34,12 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#ifdef _MSC_VER
-#include <direct.h>
-#define mkdir _mkdir
-#else
+//#ifdef _MSC_VER
+//#include <direct.h>
+//#define mkdir _mkdir
+//#else
 #include <unistd.h>
-#endif
+//#endif
 
 /* Configuration Load/Save handler */
 
@@ -55,14 +55,22 @@ const DosKeySettings defaultDosKeySettings =
 
 const KeySettings defaultKeySettings =
 {
-	SDL_SCANCODE_UP,
+/*	SDL_SCANCODE_UP,
 	SDL_SCANCODE_DOWN,
 	SDL_SCANCODE_LEFT,
 	SDL_SCANCODE_RIGHT,
 	SDL_SCANCODE_SPACE,
 	SDL_SCANCODE_RETURN,
 	SDL_SCANCODE_LCTRL,
-	SDL_SCANCODE_LALT,
+	SDL_SCANCODE_LALT,*/
+	0,
+	1,
+	2,
+	3,
+	4,
+	5,
+	6,
+	7
 };
 
 static const char *const keySettingNames[] =
@@ -248,18 +256,18 @@ bool load_opentyrian_config(void)
 {
 	// defaults
 	fullscreen_display = -1;
-	set_scaler_by_name("Scale2x");
+//	set_scaler_by_name("Scale2x");
 	memcpy(keySettings, defaultKeySettings, sizeof(keySettings));
 	
 	Config *config = &opentyrian_config;
 	
-	FILE *file = dir_fopen_warn(get_user_directory(), "opentyrian.cfg", "r");
-	if (file == NULL)
+	int file = dir_fopen_warn(get_user_directory(), "opentyrian.cfg", "r");
+	if (file < 0)
 		return false;
 	
 	if (!config_parse(config, file))
 	{
-		fclose(file);
+		dfs_close(file);
 		
 		return false;
 	}
@@ -271,13 +279,13 @@ bool load_opentyrian_config(void)
 	{
 		config_get_int_option(section, "fullscreen", &fullscreen_display);
 		
-		const char *scaler;
-		if (config_get_string_option(section, "scaler", &scaler))
-			set_scaler_by_name(scaler);
+//		const char *scaler;
+//		if (config_get_string_option(section, "scaler", &scaler))
+//			set_scaler_by_name(scaler);
 		
-		const char *scaling_mode;
-		if (config_get_string_option(section, "scaling_mode", &scaling_mode))
-			set_scaling_mode_by_name(scaling_mode);
+//		const char *scaling_mode;
+//		if (config_get_string_option(section, "scaling_mode", &scaling_mode))
+//			set_scaling_mode_by_name(scaling_mode);
 	}
 
 	section = config_find_section(config, "keyboard", NULL);
@@ -288,14 +296,15 @@ bool load_opentyrian_config(void)
 			const char *keyName;
 			if (config_get_string_option(section, keySettingNames[i], &keyName))
 			{
-				SDL_Scancode scancode = SDL_GetScancodeFromName(keyName);
-				if (scancode != SDL_SCANCODE_UNKNOWN)
-					keySettings[i] = scancode;
+				// FIXME
+				//SDL_Scancode scancode = SDL_GetScancodeFromName(keyName);
+				//if (scancode != SDL_SCANCODE_UNKNOWN)
+				//	keySettings[i] = scancode;
 			}
 		}
 	}
 
-	fclose(file);
+	dfs_close(file);
 	
 	return true;
 }
@@ -312,9 +321,9 @@ bool save_opentyrian_config(void)
 	
 	config_set_int_option(section, "fullscreen", fullscreen_display);
 	
-	config_set_string_option(section, "scaler", scalers[scaler].name);
+//	config_set_string_option(section, "scaler", scalers[scaler].name);
 	
-	config_set_string_option(section, "scaling_mode", scaling_mode_names[scaling_mode]);
+//	config_set_string_option(section, "scaling_mode", scaling_mode_names[scaling_mode]);
 
 	section = config_find_or_add_section(config, "keyboard", NULL);
 	if (section == NULL)
@@ -322,12 +331,14 @@ bool save_opentyrian_config(void)
 
 	for (size_t i = 0; i < COUNTOF(keySettings); ++i)
 	{
-		const char *keyName = SDL_GetScancodeName(keySettings[i]);
-		if (keyName[0] == '\0')
-			keyName = NULL;
-		config_set_string_option(section, keySettingNames[i], keyName);
+		// FIXME
+		//const char *keyName = SDL_GetScancodeName(keySettings[i]);
+		//if (keyName[0] == '\0')
+		//	keyName = NULL;
+		//config_set_string_option(section, keySettingNames[i], keyName);
 	}
 
+#if 0
 #ifndef TARGET_WIN32
 	mkdir(get_user_directory(), 0700);
 #else
@@ -344,7 +355,7 @@ bool save_opentyrian_config(void)
 	fsync(fileno(file));
 #endif
 	fclose(file);
-	
+#endif	
 	return true;
 }
 
@@ -781,7 +792,7 @@ Uint8 inputDevice_ = 0, jConfigure = 0, midiPort = 1;
 
 void JE_loadConfiguration(void)
 {
-	FILE *fi;
+	int fi;
 	int z;
 	JE_byte *p;
 	int y;
@@ -813,7 +824,7 @@ void JE_loadConfiguration(void)
 
 		fread_u8_die(dosKeySettings, 8, fi);
 		
-		fclose(fi);
+		dfs_close(fi);
 	}
 	else
 	{
@@ -825,24 +836,28 @@ void JE_loadConfiguration(void)
 		tyrMusicVolume = 191;
 		fxVolume = 191;
 		gammaCorrection = 0;
-		processorType = 3;
-		gameSpeed = 4;
+		processorType = 1;//3;//4
+		gameSpeed = 3;
+//		printf("...\n");
+
 	}
 	
 	load_opentyrian_config();
-	
+	//printf("...\n");
+
 	if (tyrMusicVolume > 255)
 		tyrMusicVolume = 255;
 	if (fxVolume > 255)
 		fxVolume = 255;
 	
 	set_volume(tyrMusicVolume, fxVolume);
+//printf("...\n");
 	
 	fi = dir_fopen_warn(get_user_directory(), "tyrian.sav", "rb");
-	if (fi)
+	if (fi > 0)
 	{
 
-		fseek(fi, 0, SEEK_SET);
+		dfs_seek(fi, 0, SEEK_SET);
 		fread_die(saveTemp, 1, sizeof(saveTemp), fi);
 		JE_decryptSaveTemp();
 
@@ -854,18 +869,18 @@ void JE_loadConfiguration(void)
 		for (z = 0; z < SAVE_FILES_NUM; z++)
 		{
 			memcpy(&saveFiles[z].encode, p, sizeof(JE_word)); p += 2;
-			saveFiles[z].encode = SDL_SwapLE16(saveFiles[z].encode);
+			saveFiles[z].encode = SHORT(saveFiles[z].encode);
 			
 			memcpy(&saveFiles[z].level, p, sizeof(JE_word)); p += 2;
-			saveFiles[z].level = SDL_SwapLE16(saveFiles[z].level);
+			saveFiles[z].level = SHORT(saveFiles[z].level);
 			
 			memcpy(&saveFiles[z].items, p, sizeof(JE_PItemsType)); p += sizeof(JE_PItemsType);
 			
 			memcpy(&saveFiles[z].score, p, sizeof(JE_longint)); p += 4;
-			saveFiles[z].score = SDL_SwapLE32(saveFiles[z].score);
+			saveFiles[z].score = LONG(saveFiles[z].score);
 			
 			memcpy(&saveFiles[z].score2, p, sizeof(JE_longint)); p += 4;
-			saveFiles[z].score2 = SDL_SwapLE32(saveFiles[z].score2);
+			saveFiles[z].score2 = LONG(saveFiles[z].score2);
 			
 			/* SYN: Pascal strings are prefixed by a byte holding the length! */
 			memset(&saveFiles[z].levelName, 0, sizeof(saveFiles[z].levelName));
@@ -893,10 +908,10 @@ void JE_loadConfiguration(void)
 			memcpy(&saveFiles[z].initialDifficulty, p, sizeof(JE_byte)); p++;
 			
 			memcpy(&saveFiles[z].highScore1, p, sizeof(JE_longint)); p += 4;
-			saveFiles[z].highScore1 = SDL_SwapLE32(saveFiles[z].highScore1);
+			saveFiles[z].highScore1 = LONG(saveFiles[z].highScore1);
 			
 			memcpy(&saveFiles[z].highScore2, p, sizeof(JE_longint)); p += 4;
-			saveFiles[z].highScore2 = SDL_SwapLE32(saveFiles[z].highScore2);
+			saveFiles[z].highScore2 = LONG(saveFiles[z].highScore2);
 			
 			memset(&saveFiles[z].highScoreName, 0, sizeof(saveFiles[z].highScoreName));
 			memcpy(&saveFiles[z].highScoreName, &p[1], *p);
@@ -909,7 +924,7 @@ void JE_loadConfiguration(void)
 		/* TODO: Figure out what this is about and make sure it isn't broken. */
 		editorLevel = (saveTemp[SIZEOF_SAVEGAMETEMP - 5] << 8) | saveTemp[SIZEOF_SAVEGAMETEMP - 6];
 
-		fclose(fi);
+		dfs_close(fi);
 	}
 	else
 	{
@@ -950,7 +965,8 @@ void JE_loadConfiguration(void)
 
 void JE_saveConfiguration(void)
 {
-	FILE *f;
+#if 0
+	int f;
 	JE_byte *p;
 	int z;
 
@@ -960,18 +976,18 @@ void JE_saveConfiguration(void)
 		JE_SaveFileType tempSaveFile;
 		memcpy(&tempSaveFile, &saveFiles[z], sizeof(tempSaveFile));
 		
-		tempSaveFile.encode = SDL_SwapLE16(tempSaveFile.encode);
+		tempSaveFile.encode = SHORT(tempSaveFile.encode);
 		memcpy(p, &tempSaveFile.encode, sizeof(JE_word)); p += 2;
 		
-		tempSaveFile.level = SDL_SwapLE16(tempSaveFile.level);
+		tempSaveFile.level = SHORT(tempSaveFile.level);
 		memcpy(p, &tempSaveFile.level, sizeof(JE_word)); p += 2;
 		
 		memcpy(p, &tempSaveFile.items, sizeof(JE_PItemsType)); p += sizeof(JE_PItemsType);
 		
-		tempSaveFile.score = SDL_SwapLE32(tempSaveFile.score);
+		tempSaveFile.score = LONG(tempSaveFile.score);
 		memcpy(p, &tempSaveFile.score, sizeof(JE_longint)); p += 4;
 		
-		tempSaveFile.score2 = SDL_SwapLE32(tempSaveFile.score2);
+		tempSaveFile.score2 = LONG(tempSaveFile.score2);
 		memcpy(p, &tempSaveFile.score2, sizeof(JE_longint)); p += 4;
 		
 		/* SYN: Pascal strings are prefixed by a byte holding the length! */
@@ -999,10 +1015,10 @@ void JE_saveConfiguration(void)
 		
 		memcpy(p, &tempSaveFile.initialDifficulty, sizeof(JE_byte)); p++;
 		
-		tempSaveFile.highScore1 = SDL_SwapLE32(tempSaveFile.highScore1);
+		tempSaveFile.highScore1 = LONG(tempSaveFile.highScore1);
 		memcpy(p, &tempSaveFile.highScore1, sizeof(JE_longint)); p += 4;
 		
-		tempSaveFile.highScore2 = SDL_SwapLE32(tempSaveFile.highScore2);
+		tempSaveFile.highScore2 = LONG(tempSaveFile.highScore2);
 		memcpy(p, &tempSaveFile.highScore2, sizeof(JE_longint)); p += 4;
 		
 		memset(p, 0, sizeof(tempSaveFile.highScoreName));
@@ -1017,7 +1033,9 @@ void JE_saveConfiguration(void)
 	saveTemp[SIZEOF_SAVEGAMETEMP - 5] = editorLevel;
 	
 	JE_encryptSaveTemp();
-	
+
+// FIXME
+#if 0	
 #ifndef TARGET_WIN32
 	mkdir(get_user_directory(), 0700);
 #else
@@ -1034,11 +1052,13 @@ void JE_saveConfiguration(void)
 #endif
 		fclose(f);
 	}
-	
+#endif	
+
 	JE_decryptSaveTemp();
 	
+#if 0
 	f = dir_fopen_warn(get_user_directory(), "tyrian.cfg", "wb");
-	if (f != NULL)
+	if (f > -1)
 	{
 		fwrite_bool_die(&background2, f);
 		fwrite_u8_die(&gameSpeed, 1, f);
@@ -1061,11 +1081,13 @@ void JE_saveConfiguration(void)
 		
 		fwrite_u8_die(dosKeySettings, 8, f);
 		
-#if _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _POSIX_SOURCE
-		fsync(fileno(f));
-#endif
+//#if _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _POSIX_SOURCE
+//	fsync(fileno(f));
+//#endif
 		fclose(f);
 	}
 	
 	save_opentyrian_config();
+#endif
+#endif
 }

@@ -19,21 +19,21 @@
 #include "keyboard.h"
 
 #include "joystick.h"
-#include "mouse.h"
+//#include "mouse.h"
 #include "network.h"
 #include "opentyr.h"
 #include "video.h"
 #include "video_scale.h"
 
-#include "SDL.h"
+//#include "SDL.h"
 
 #include <stdio.h>
 
 JE_boolean ESCPressed;
 
 JE_boolean newkey, newmouse, keydown, mousedown;
-SDL_Scancode lastkey_scan;
-SDL_Keymod lastkey_mod;
+//SDL_Scancode lastkey_scan;
+//SDL_Keymod lastkey_mod;
 Uint8 lastmouse_but;
 Sint32 lastmouse_x, lastmouse_y;
 JE_boolean mouse_pressed[3] = {false, false, false};
@@ -41,10 +41,10 @@ Sint32 mouse_x, mouse_y;
 
 bool windowHasFocus;
 
-Uint8 keysactive[SDL_NUM_SCANCODES];
+Uint8 keysactive[101];//SDL_NUM_SCANCODES];
 
 bool new_text;
-char last_text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
+char last_text[128];//SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
 static bool mouseRelativeEnabled;
 
@@ -54,13 +54,16 @@ static Sint32 mouseWindowYRelative;
 
 void flush_events_buffer(void)
 {
+#if 0
 	SDL_Event ev;
 
 	while (SDL_PollEvent(&ev));
+#endif
 }
 
 void wait_input(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 {
+#if 0	
 	service_SDL_events(false);
 	while (!((keyboard && keydown) || (mouse && mousedown) || (joystick && joydown)))
 	{
@@ -73,10 +76,12 @@ void wait_input(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 			network_check();
 #endif
 	}
+#endif	
 }
 
 void wait_noinput(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 {
+#if 0	
 	service_SDL_events(false);
 	while ((keyboard && keydown) || (mouse && mousedown) || (joystick && joydown))
 	{
@@ -89,42 +94,51 @@ void wait_noinput(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 			network_check();
 #endif
 	}
+#endif	
 }
 
 void init_keyboard(void)
 {
+
 	//SDL_EnableKeyRepeat(500, 60); TODO Find if SDL2 has an equivalent.
 
 	newkey = newmouse = false;
 	keydown = mousedown = false;
-
+#if 0
 	SDL_ShowCursor(SDL_FALSE);
 
 #if SDL_VERSION_ATLEAST(2, 26, 0)
 	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SYSTEM_SCALE, "1");
 #endif
+#endif
 }
 
 void mouseSetRelative(bool enable)
 {
+#if 0
 	SDL_SetRelativeMouseMode(enable && windowHasFocus);
 
 	mouseRelativeEnabled = enable;
 
 	mouseWindowXRelative = 0;
 	mouseWindowYRelative = 0;
+#endif
 }
 
 JE_word JE_mousePosition(JE_word *mouseX, JE_word *mouseY)
 {
+#if 0	
 	service_SDL_events(false);
 	*mouseX = mouse_x;
 	*mouseY = mouse_y;
 	return mousedown ? lastmouse_but : 0;
+#endif
+return 0;
 }
 
 void mouseGetRelativePosition(Sint32 *const out_x, Sint32 *const out_y)
 {
+#if 0	
 	service_SDL_events(false);
 
 	scaleWindowDistanceToScreen(&mouseWindowXRelative, &mouseWindowYRelative);
@@ -133,11 +147,12 @@ void mouseGetRelativePosition(Sint32 *const out_x, Sint32 *const out_y)
 
 	mouseWindowXRelative = 0;
 	mouseWindowYRelative = 0;
+#endif
 }
 
 void service_SDL_events(JE_boolean clear_new)
 {
-	SDL_Event ev;
+//	SDL_Event ev;
 
 	if (clear_new)
 	{
@@ -145,7 +160,7 @@ void service_SDL_events(JE_boolean clear_new)
 		newmouse = false;
 		new_text = false;
 	}
-
+#if 0
 	while (SDL_PollEvent(&ev))
 	{
 		switch (ev.type)
@@ -256,6 +271,7 @@ void service_SDL_events(JE_boolean clear_new)
 				break;
 		}
 	}
+#endif	
 }
 
 void JE_clearKeyboard(void)

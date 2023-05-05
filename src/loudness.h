@@ -22,8 +22,6 @@
 #include "opentyr.h"
 #include "opl.h"
 
-#include "SDL.h"
-
 extern int audioSampleRate;
 
 extern unsigned int song_playing;

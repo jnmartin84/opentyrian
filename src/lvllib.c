@@ -28,7 +28,7 @@ JE_word lvlNum;
 
 void JE_analyzeLevel(void)
 {
-	FILE *f = dir_fopen_die(data_dir(), levelFile, "rb");
+	int f = dir_fopen_die(data_dir(), levelFile, "rb");
 	
 	fread_u16_die(&lvlNum, 1, f);
 
@@ -36,5 +36,5 @@ void JE_analyzeLevel(void)
 	
 	lvlPos[lvlNum] = ftell_eof(f);
 	
-	fclose(f);
+	dfs_close(f);
 }

@@ -1119,7 +1119,7 @@ void adlib_getsample(Bit16s* sndptr, Bits numsamples) {
 
 	for (Bits cursmp=0; cursmp<samples_to_process; cursmp+=endsamples) {
 		endsamples = samples_to_process-cursmp;
-		if (endsamples>BLOCKBUF_SIZE) endsamples = BLOCKBUF_SIZE;
+		if (endsamples>BLOCKBUF_SIZE) endsamples = (BLOCKBUF_SIZE);
 
 		memset((void*)&outbufl,0,endsamples*sizeof(Bit32s));
 #if defined(OPLTYPE_IS_OPL3)
@@ -1605,8 +1605,11 @@ void adlib_getsample(Bit16s* sndptr, Bits numsamples) {
 		}
 #else
 		// convert to 16bit samples
-		for (i=0;i<endsamples;i++)
+		for (i=0;i<endsamples;i++) {
 			clipit16(outbufl[i],sndptr++);
+			sndptr++;
+			//*sndptr++ = (int16_t)outbufl[i];
+		}			
 #endif
 
 	}

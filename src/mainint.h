@@ -71,7 +71,7 @@ void JE_outCharGlow(JE_word x, JE_word y, const char *s);
 
 void JE_playCredits(void);
 void JE_endLevelAni(void);
-void JE_drawCube(SDL_Surface * screen, JE_word x, JE_word y, JE_byte filter, JE_byte brightness);
+void JE_drawCube(uint8_t * screen, JE_word x, JE_word y, JE_byte filter, JE_byte brightness);
 void JE_handleChat(void);
 bool str_pop_int(char *str, int *val);
 bool JE_loadScreen(void);

@@ -92,7 +92,7 @@ static void decrypt_string(char *s, size_t len)
 	}
 }
 
-void read_encrypted_pascal_string(char *s, size_t size, FILE *f)
+void read_encrypted_pascal_string(char *s, size_t size, int f)
 {
 	Uint8 len;
 	char buffer[255];
@@ -112,7 +112,7 @@ void read_encrypted_pascal_string(char *s, size_t size, FILE *f)
 	s[len] = '\0';
 }
 
-void skip_pascal_string(FILE *f)
+void skip_pascal_string(int f)
 {
 	Uint8 len;
 	char buffer[255];
@@ -121,7 +121,7 @@ void skip_pascal_string(FILE *f)
 	fread_die(buffer, 1, len, f);
 }
 
-void JE_helpBox(SDL_Surface *screen,  int x, int y, const char *message, unsigned int boxwidth)
+void JE_helpBox(uint8_t *screen,  int x, int y, const char *message, unsigned int boxwidth)
 {
 	JE_byte startpos, endpos, pos;
 	JE_boolean endstring;
@@ -160,7 +160,8 @@ void JE_helpBox(SDL_Surface *screen,  int x, int y, const char *message, unsigne
 
 		} while (!((unsigned)(pos - startpos) > boxwidth || endstring));
 
-		SDL_strlcpy(substring, message + startpos - 1, MIN((size_t)(endpos - startpos + 1), sizeof(substring)));
+		// FIXME
+		//SDL_strlcpy(substring, message + startpos - 1, MIN((size_t)(endpos - startpos + 1), sizeof(substring)));
 		JE_textShade(screen, x, y, substring, helpBoxColor, helpBoxBrightness, helpBoxShadeType);
 
 		y += verticalHeight;
@@ -176,7 +177,7 @@ void JE_helpBox(SDL_Surface *screen,  int x, int y, const char *message, unsigne
 	helpBoxShadeType = FULL_SHADE;
 }
 
-void JE_HBox(SDL_Surface *screen, int x, int y, unsigned int  messagenum, unsigned int boxwidth)
+void JE_HBox(uint8_t *screen, int x, int y, unsigned int  messagenum, unsigned int boxwidth)
 {
 	JE_helpBox(screen, x, y, helpTxt[messagenum-1], boxwidth);
 }
@@ -185,7 +186,7 @@ void JE_loadHelpText(void)
 {
 	const unsigned int menuInt_entries[MENU_MAX + 1] = { -1, 7, 9, 8, -1, -1, 11, -1, -1, -1, 6, 4, 6, 7, 5 };
 	
-	FILE *f = dir_fopen_die(data_dir(), "tyrian.hdt", "rb");
+	int f = dir_fopen_die(data_dir(), "tyrian.hdt", "rb");
 	fread_s32_die(&episode1DataLoc, 1, f);
 
 	/*Online Help*/
@@ -388,5 +389,5 @@ void JE_loadHelpText(void)
 	for (unsigned int i = 0; i < menuInt_entries[14]; ++i)
 		read_encrypted_pascal_string(menuInt[14][i], sizeof(menuInt[14][i]), f);
 
-	fclose(f);
+	dfs_close(f);
 }

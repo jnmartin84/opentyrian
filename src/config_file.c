@@ -38,7 +38,8 @@ extern void config_oom(void);
 
 void config_oom(void)
 {
-	fprintf(stderr, "out of memory\n");
+	printf("out of memory\n");
+	while(1) {}
 	exit(EXIT_FAILURE);
 }
 
@@ -765,10 +766,10 @@ static bool parse_field(char *buffer, size_t *index, size_t *start, size_t *leng
 	return true;
 }
 
-bool config_parse(Config *config, FILE *file)
+bool config_parse(Config *config, int file)
 {
 	assert(config != NULL);
-	assert(file != NULL);
+	assert(file > -1);
 	
 	config_init(config);
 	
@@ -809,7 +810,7 @@ bool config_parse(Config *config, FILE *file)
 					buffer = new_buffer;
 				}
 				
-				size_t read = fread(&buffer[buffer_end - 1], sizeof(char), buffer_cap - buffer_end, file);
+				size_t read = dfs_read(&buffer[buffer_end - 1], sizeof(char), buffer_cap - buffer_end, file);
 				if (read == 0)
 					break;
 				
@@ -908,8 +909,9 @@ bool config_parse(Config *config, FILE *file)
 
 /* config writer */
 
-static void write_field(const ConfigString *field, FILE *file)
+static void write_field(const ConfigString *field, int file)
 {
+#if 0
 	fputc('\'', file);
 	
 	char buffer[128];
@@ -982,10 +984,12 @@ static void write_field(const ConfigString *field, FILE *file)
 		fwrite(buffer, sizeof(*buffer), o, file);
 	
 	fputc('\'', file);
+#endif	
 }
 
-void config_write(const Config *config, FILE *file)
+void config_write(const Config *config, int file)
 {
+#if 0	
 	assert(config != NULL);
 	assert(file != NULL);
 	
@@ -1030,4 +1034,5 @@ void config_write(const Config *config, FILE *file)
 		
 		fputc('\n', file);
 	}
+#endif	
 }

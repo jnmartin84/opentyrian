@@ -21,9 +21,9 @@
 
 #include "opentyr.h"
 
-#include "SDL.h"
+//#include "SDL.h"
 
-typedef void (*ScalerFunction)(SDL_Surface *src, SDL_Texture *dst);
+typedef void (*ScalerFunction)(uint8_t *src, uint16_t *dst);
 
 struct Scalers
 {

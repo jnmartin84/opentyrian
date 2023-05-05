@@ -21,7 +21,7 @@
 
 #include "opentyr.h"
 
-#include "SDL.h"
+//#include "SDL.h"
 
 #define vga_width 320
 #define vga_height 200
@@ -39,13 +39,16 @@ extern const char *const scaling_mode_names[ScalingMode_MAX];
 extern int fullscreen_display; // -1 means windowed
 extern ScalingMode scaling_mode;
 
-extern SDL_Surface *VGAScreen, *VGAScreenSeg;
-extern SDL_Surface *game_screen;
-extern SDL_Surface *VGAScreen2;
+extern uint8_t *VGAScreen, *VGAScreenSeg;
+extern uint8_t *game_screen;
+extern uint8_t *VGAScreen2;
 
-extern SDL_Window *main_window;
-extern SDL_PixelFormat *main_window_tex_format;
-
+//extern SDL_Window *main_window;
+//extern SDL_PixelFormat *main_window_tex_format;
+#define screenwidth 320
+#define screenheight 200
+#define screenpixbytes 1
+#define screenpitch (screenwidth*screenpixbytes)
 void init_video(void);
 
 void video_on_win_resize(void);
@@ -56,7 +59,7 @@ bool set_scaling_mode_by_name(const char *name);
 
 void deinit_video(void);
 
-void JE_clr256(SDL_Surface *);
+void JE_clr256(uint8_t *);
 void JE_showVGA(void);
 
 void mapScreenPointToWindow(Sint32 *inout_x, Sint32 *inout_y);

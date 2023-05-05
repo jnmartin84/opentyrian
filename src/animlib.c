@@ -64,7 +64,7 @@ anim_FileHeader_t FileHeader;
 
 unsigned int Curlpnum;
 
-FILE * InFile;
+int InFile;
 
 /*** Function decs ***/
 int JE_playRunSkipDump(Uint8 *, unsigned int);
@@ -95,12 +95,12 @@ int JE_loadPage(unsigned int pagenumber)
 	 * Pages repeat their headers for some reason.  They then have two bytes of
 	 * padding followed by a word for every record.  THEN the data starts.
 	 */
-	fseek(InFile, ANIM_OFFSET + (pagenumber * ANI_PAGE_SIZE), SEEK_SET);
+	dfs_seek(InFile, ANIM_OFFSET + (pagenumber * ANI_PAGE_SIZE), SEEK_SET);
 	fread_u16_die(&CurrentPageHeader.baseRecord, 1, InFile);
 	fread_u16_die(&CurrentPageHeader.nRecords,   1, InFile);
 	fread_u16_die(&CurrentPageHeader.nBytes,     1, InFile);
 
-	fseek(InFile, 2, SEEK_CUR);
+	dfs_seek(InFile, 2, SEEK_CUR);
 	fread_u16_die(CurrentPageRecordSizes, CurrentPageHeader.nRecords, InFile);
 
 	/* What remains is the 'compressed' data */
@@ -208,7 +208,7 @@ int JE_loadAnim(const char *filename)
 
 	Curlpnum = -1;
 	InFile = dir_fopen(data_dir(), filename, "rb");
-	if (InFile == NULL)
+	if (InFile < 0)
 		return -1;
 
 	fileSize = ftell_eof(InFile);
@@ -216,7 +216,7 @@ int JE_loadAnim(const char *filename)
 	{
 		/* We don't know the exact size our file should be yet,
 		 * but we do know it should be way more than this */
-		fclose(InFile);
+		dfs_close(InFile);
 		return -1;
 	}
 
@@ -228,7 +228,7 @@ int JE_loadAnim(const char *filename)
 	 */
 
 	fread_die(&temp, 1, 4, InFile); /* The ID, should equal "LPF " */
-	fseek(InFile, 2, SEEK_CUR); /* skip over this word */
+	dfs_seek(InFile, 2, SEEK_CUR); /* skip over this word */
 	fread_u16_die(&FileHeader.nlps,     1, InFile); /* Number of pages */
 	fread_u32_die(&FileHeader.nRecords, 1, InFile); /* Number of records */
 
@@ -236,12 +236,12 @@ int JE_loadAnim(const char *filename)
 	    FileHeader.nlps == 0  || FileHeader.nRecords == 0 ||
 	    FileHeader.nlps > 256 || FileHeader.nRecords > 65535)
 	{
-		fclose(InFile);
+		dfs_close(InFile);
 		return -1;
 	}
 
 	/* Read in headers */
-	fseek(InFile, PAGEHEADER_OFFSET, SEEK_SET);
+	dfs_seek(InFile, PAGEHEADER_OFFSET, SEEK_SET);
 	for (i = 0; i < FileHeader.nlps; i++)
 	{
 		fread_u16_die(&PageHeader[i].baseRecord, 1, InFile);
@@ -256,12 +256,12 @@ int JE_loadAnim(const char *filename)
 	  + PageHeader[FileHeader.nlps-1].nBytes
 	  + PageHeader[FileHeader.nlps-1].nRecords * 2 + 8)
 	{
-		fclose(InFile);
+		dfs_close(InFile);
 		return -1;
 	}
 
 	/* Now read in the palette. */
-	fseek(InFile, PALETTE_OFFSET, SEEK_SET);
+	dfs_seek(InFile, PALETTE_OFFSET, SEEK_SET);
 	for (i = 0; i < 256; i++)
 	{
 		Uint8 bgru[4];
@@ -269,6 +269,7 @@ int JE_loadAnim(const char *filename)
 		colors[i].b = bgru[0];
 		colors[i].g = bgru[1];
 		colors[i].r = bgru[2];
+		//graphics_make_color(bgru[2],bgru[1],bgru[0],0);
 	}
 	set_palette(colors, 0, 255);
 
@@ -278,7 +279,7 @@ int JE_loadAnim(const char *filename)
 
 void JE_closeAnim(void)
 {
-	fclose(InFile);
+	dfs_close(InFile);
 }
 
 /* RunSkipDump decompresses the video.  There are three operations, run, skip,
@@ -306,12 +307,12 @@ int JE_playRunSkipDump(Uint8 *incomingBuffer, unsigned int IncomingBufferLength)
 	#define ANI_STOP       0x0000
 
 	SZ_Init(pBuffer_IN,  incomingBuffer,    IncomingBufferLength);
-	SZ_Init(pBuffer_OUT, VGAScreen->pixels, VGAScreen->h * VGAScreen->pitch);
+	SZ_Init(pBuffer_OUT, (Uint8*)VGAScreen/*->pixels*/, /*VGAScreen->h*/screenheight * /*VGAScreen->pitch*/screenpitch);
 
 	/* 320x200 is the only supported format.
 	 * Assert is here as a hint should our screen size ever changes.
 	 * As for how to decompress to the wrong screen size... */
-	assert(VGAScreen->h * VGAScreen->pitch == 320 * 200);
+	//assert(VGAScreen->h * VGAScreen->pitch == 320 * 200);
 
 	while (true)
 	{
