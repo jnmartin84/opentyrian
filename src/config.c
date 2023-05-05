@@ -837,13 +837,10 @@ void JE_loadConfiguration(void)
 		fxVolume = 191;
 		gammaCorrection = 0;
 		processorType = 1;//3;//4
-		gameSpeed = 3;
-//		printf("...\n");
-
+		gameSpeed = 4;
 	}
 	
 	load_opentyrian_config();
-	//printf("...\n");
 
 	if (tyrMusicVolume > 255)
 		tyrMusicVolume = 255;
@@ -851,7 +848,6 @@ void JE_loadConfiguration(void)
 		fxVolume = 255;
 	
 	set_volume(tyrMusicVolume, fxVolume);
-//printf("...\n");
 	
 	fi = dir_fopen_warn(get_user_directory(), "tyrian.sav", "rb");
 	if (fi > 0)

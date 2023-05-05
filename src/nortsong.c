@@ -200,8 +200,6 @@ void loadSndFile(bool xmas)
 	dfs_close(f);
 
 	// Convert samples to output sample format and rate.
-// FIXME
-#if 1
 	//SDL_AudioCVT cvt;
 	//if (SDL_BuildAudioCVT(&cvt, AUDIO_S8, 1, 11025, AUDIO_S16SYS, 1, audioSampleRate) < 0)
 	//{
@@ -234,10 +232,13 @@ void loadSndFile(bool xmas)
 //
 //			continue;
 //		}
-       for (size_t samp_i = 0; samp_i < cvt_len; samp_i++)
-	   {
-			cvt_buf[samp_i] = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i)*256;
-	   }
+
+// 11025
+		for (size_t samp_i = 0; samp_i < cvt_len; samp_i++)
+		{
+			Sint16 s1 = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i)*255;
+			cvt_buf[samp_i] = s1;
+		}
 
 		free(soundSamples[i]);
 		soundSamples[i] = malloc(cvt_len * 2);
@@ -247,7 +248,6 @@ void loadSndFile(bool xmas)
 	}
 
 	free(cvt_buf);
-#endif
 	return;
 
 die:

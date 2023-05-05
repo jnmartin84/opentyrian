@@ -756,11 +756,10 @@ void setupMenu(void)
 		}
 	}
 }
-extern void *__safe_buffer[];
 static volatile uint64_t timekeeping = 0;
 
-void tickercb(int o) { //, int a, int b, int c) {
-	timekeeping+=17;
+void tickercb(int o) {
+	timekeeping+=1;
 }
 
 uint32_t n64_GetTicks() {
@@ -770,7 +769,6 @@ uint32_t n64_GetTicks() {
 
 __attribute__ ((optimize(0))) void n64_Delay(uint32_t duration)
 {
-	// everything is single millseconds now
 	const uint64_t start = timekeeping;
 	const uint64_t durationtk = duration;
 	while ( ((timekeeping) - start) < durationtk ) {
@@ -780,16 +778,14 @@ __attribute__ ((optimize(0))) void n64_Delay(uint32_t duration)
 
 volatile struct AI_regs_s *AI_regs = (struct AI_regs_s *)0xA4500000;
 #define AI_STATUS_FULL  ( 1 << 31 )
-static int16_t __attribute__((aligned(8))) pcmout1[NUM_SAMPLES*STEREO_MUL] = {0};
-static int16_t __attribute__((aligned(8))) pcmout2[NUM_SAMPLES*STEREO_MUL] = {0};
+static int16_t __attribute__((aligned(8))) pcmout[2][NUM_SAMPLES*STEREO_MUL] = {{0}};
 int pcmflip = 0;
-int16_t* pcmout[2] = {pcmout1,pcmout2};
-int16_t* pcmbuf = pcmout1;
+int16_t* pcmbuf;
 extern void audioCallback(void *userdata, Uint8 *stream, int size);
-void the_audio_callback(int o) { //, int a, int b, int c) {
+void the_audio_callback(int o) {
 	if(!(AI_regs->status & AI_STATUS_FULL)) {
 
-		audioCallback(NULL, pcmbuf, NUM_BYTES_IN_SAMPLE_BUFFER/2);
+		audioCallback(NULL, (Uint8*)pcmbuf, NUM_BYTES_IN_SAMPLE_BUFFER/2);
 
 		AI_regs->address = (volatile void *)pcmbuf;
 		AI_regs->length = NUM_BYTES_IN_SAMPLE_BUFFER;
@@ -803,16 +799,13 @@ void the_audio_callback(int o) { //, int a, int b, int c) {
 void n64_startAudio(void)
 {
 	audio_init(SOUND_SAMPLE_RATE, 0);
-	pcmout[0] = pcmout1;
-	pcmout[1] = pcmout2;
 	pcmbuf = pcmout[pcmflip];
 
 	/* timer_link_t* audio_timer = */
 	new_timer(
-		// double the number of times per second that samples get generated
-		// to smooth out clicks and pops and allow for the flag to clear
-		// for writing more sample data to AI
-		TIMER_TICKS(7500),//62,//820312*3,
+		// often enough to stop clicks
+		// might need more tweaking
+		TIMER_TICKS(7500),
 		TF_CONTINUOUS,
 		the_audio_callback);
 }
@@ -836,8 +829,8 @@ int main(int argc, char *argv[])
 	timekeeping = 0;
 	/* timer_link_t* tick_timer = */
 	new_timer(
-	// 1 millisecond tics
-		TIMER_TICKS(17000),
+		// 1 millisecond tics
+		TIMER_TICKS(1000),
 		TF_CONTINUOUS,
 		tickercb
 	);
@@ -980,11 +973,6 @@ int main(int argc, char *argv[])
 		else
 #endif
 		{
-			    console_clear();
-    console_close();
-memset((uint16_t *)(__safe_buffer[0]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
-    memset((uint16_t *)(__safe_buffer[1]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
-
 			JE_main();
 
 			if (trentWin)

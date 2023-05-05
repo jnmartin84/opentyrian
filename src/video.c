@@ -60,9 +60,15 @@ static int window_get_display_index(void);
 static void window_center_in_display(int display_index);
 //static void calc_dst_render_rect(uint8_t *src_surface, SDL_Rect *dst_rect);
 //static void scale_and_flip(SDL_Surface *);
+extern void *__safe_buffer[];
 
 void init_video(void)
 {
+				    console_clear();
+    console_close();
+memset((uint16_t *)(__safe_buffer[0]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
+    memset((uint16_t *)(__safe_buffer[1]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
+
 	    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
 
 	#if 0

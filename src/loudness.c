@@ -203,10 +203,13 @@ void audioCallback(void *userdata, Uint8 *stream, int size)
 			Sint32 sample = *remaining * musicVolumeFactor;
 
 			sample = FIXED_TO_INT(sample);
-			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
-			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
-
-//			remaining += 1;
+			// Nintendo 64 Audio Interface requires stereo interleaved sample data
+			// OpenTyrian is rendering everything mono
+			// we store the mono music sample into the left channel
+			// and skip the right channel altogether until later
+			*remaining = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			// move over left channel that we filled above and skip right channel
+			remaining += 2;
 			remainingCount -= 1;
 		}
 	}
@@ -218,19 +221,24 @@ void audioCallback(void *userdata, Uint8 *stream, int size)
 			sampleVolumeFactors[i] = sampleVolumeFactor * (i + 1) / CHANNEL_VOLUME_LEVELS;
 
 		// Mix music and channels
-		Sint16 *remaining;// = samples;
+		// Nintendo 64 Audio Interface needs stereo interleaved
+		// OpenTyrian is rendering everything mono
+		Sint16 *remaining;
 		Sint32 sample;
 		size_t next_sample = 0;
 		int remainingCount = samplesCount;
 		while (remainingCount > 0)
 		{
-			remaining = &samples[next_sample<<1]; 
+			// point remaining at the left channel of next sample to mix
+			remaining = &samples[next_sample]; 
+			// get left channel data for next sample to mix
 			sample = *remaining * musicVolumeFactor;
 
 			for (size_t i = 0; i < CHANNEL_COUNT; ++i)
 			{
 				if (channelSampleCount[i] > 0)
 				{
+					// mix next channel sample with existing sample
 					sample += *channelSamples[i] * sampleVolumeFactors[channelVolume[i]];
 
 					channelSamples[i] += 1;
@@ -238,13 +246,24 @@ void audioCallback(void *userdata, Uint8 *stream, int size)
 				}
 			}
 
+			// convert sample to output format
 			sample = FIXED_TO_INT(sample);
-			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
-			*remaining++ = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			// we now write sample to the output buffer twice
+			// once in left channel
+			// again in right channel
+			// we can take advantage of alignment and the fact
+			// that moving one sample ahead is actually 2 elements of the Sint16 array
+			// and write these in one 32-bit write
+			// this is faster on the Nintendo 64
+			uint32_t outsamp = MIN(MAX(INT16_MIN, sample), INT16_MAX);
+			outsamp = (outsamp << 16) | outsamp; 
+			*((uint32_t *)remaining) = outsamp;
 
-//			remaining += 2;
+			// move remaining to left channel of next sample
+			remaining += 2;
 			remainingCount -= 1;
-			next_sample += 1;
+
+			next_sample += 2;
 		}
 	}
 }
