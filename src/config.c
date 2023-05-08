@@ -33,7 +33,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
-
+#include "sdl_scancode.h"
 //#ifdef _MSC_VER
 //#include <direct.h>
 //#define mkdir _mkdir
@@ -55,22 +55,14 @@ const DosKeySettings defaultDosKeySettings =
 
 const KeySettings defaultKeySettings =
 {
-/*	SDL_SCANCODE_UP,
+	SDL_SCANCODE_UP,
 	SDL_SCANCODE_DOWN,
 	SDL_SCANCODE_LEFT,
 	SDL_SCANCODE_RIGHT,
 	SDL_SCANCODE_SPACE,
 	SDL_SCANCODE_RETURN,
 	SDL_SCANCODE_LCTRL,
-	SDL_SCANCODE_LALT,*/
-	0,
-	1,
-	2,
-	3,
-	4,
-	5,
-	6,
-	7
+	SDL_SCANCODE_LALT,
 };
 
 static const char *const keySettingNames[] =
@@ -836,7 +828,7 @@ void JE_loadConfiguration(void)
 		tyrMusicVolume = 191;
 		fxVolume = 191;
 		gammaCorrection = 0;
-		processorType = 1;//3;//4
+		processorType = 4;//3;//4
 		gameSpeed = 4;
 	}
 	

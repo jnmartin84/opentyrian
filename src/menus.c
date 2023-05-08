@@ -111,7 +111,7 @@ bool gameplaySelect(void)
 		do
 		{
 			// FIXME
-//			SDL_Delay(16);
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -169,7 +169,9 @@ bool gameplaySelect(void)
 				cancel = true;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -208,7 +210,7 @@ bool gameplaySelect(void)
 				break;
 			}
 		}
-#endif
+
 		if (action)
 		{
 			switch (selectedIndex)
@@ -368,7 +370,9 @@ bool episodeSelect(void)
 				cancel = true;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -407,7 +411,6 @@ bool episodeSelect(void)
 				break;
 			}
 		}
-#endif
 		if (action)
 		{
 			if (episodeAvail[selectedIndex])
@@ -515,8 +518,6 @@ bool difficultySelect(void)
 		} while (!(newkey || newmouse || mouseMoved));
 
 		// Handle interaction.
-// FIXME
-#if 0
 		if (menuItemsVisibleCount == 5)
 		{
 			const SDL_Scancode lordKeys[] = { SDL_SCANCODE_L, SDL_SCANCODE_O, SDL_SCANCODE_R, SDL_SCANCODE_D };
@@ -551,6 +552,7 @@ bool difficultySelect(void)
 				}
 			}
 		}
+#if 0
 		if (SDL_GetModState() & KMOD_SHIFT)
 		{
 			if (menuItemsVisibleCount == 4 && keysactive[SDL_SCANCODE_RIGHTBRACKET])
@@ -603,7 +605,9 @@ bool difficultySelect(void)
 				cancel = true;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -642,7 +646,7 @@ bool difficultySelect(void)
 				break;
 			}
 		}
-#endif
+
 		if (action)
 		{
 			JE_playSampleNum(S_SELECT);

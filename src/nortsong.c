@@ -59,21 +59,18 @@ void setDelay2(int delay)  // FKA NortSong.frameCount2
 
 Uint32 getDelayTicks(void)  // FKA NortSong.frameCount
 {
-	// FIXME
 	Sint32 delay = target - n64_GetTicks();
 	return MAX(0, delay);
 }
 
 Uint32 getDelayTicks2(void)  // FKA NortSong.frameCount2
 {
-	//FIXME
 	Sint32 delay = target2 - n64_GetTicks();
 	return MAX(0, delay);
 }
 
 void wait_delay(void)
 {
-	//FIXME
 	Sint32 delay = target - n64_GetTicks();
 	if (delay > 0)
 		n64_Delay(delay);
@@ -104,7 +101,7 @@ void wait_delayorinput(void)
 			newkey = false;
 			return;
 		}
-// FIXME
+
 		Sint32 delay = target - n64_GetTicks();
 		if (delay <= 0)
 			return;
@@ -112,6 +109,8 @@ void wait_delayorinput(void)
 		n64_Delay(MIN(delay, SDL_POLL_INTERVAL));
 	}
 }
+
+#include "samplerate.h"
 
 void loadSndFile(bool xmas)
 {
@@ -236,7 +235,7 @@ void loadSndFile(bool xmas)
 // 11025
 		for (size_t samp_i = 0; samp_i < cvt_len; samp_i++)
 		{
-			Sint16 s1 = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i)*255;
+			Sint16 s1 = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i)*127;
 			cvt_buf[samp_i] = s1;
 		}
 

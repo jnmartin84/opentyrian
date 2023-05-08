@@ -26,14 +26,17 @@
 #include "video_scale.h"
 
 //#include "SDL.h"
-
+#include "sdl_scancode.h"
 #include <stdio.h>
+extern size_t iq_len;
+extern size_t iq_start;
 
 JE_boolean ESCPressed;
 
 JE_boolean newkey, newmouse, keydown, mousedown;
-//SDL_Scancode lastkey_scan;
-//SDL_Keymod lastkey_mod;
+SDL_Scancode lastkey_scan;
+//SDL_Keymod 
+int lastkey_mod;
 Uint8 lastmouse_but;
 Sint32 lastmouse_x, lastmouse_y;
 JE_boolean mouse_pressed[3] = {false, false, false};
@@ -41,7 +44,7 @@ Sint32 mouse_x, mouse_y;
 
 bool windowHasFocus;
 
-Uint8 keysactive[101];//SDL_NUM_SCANCODES];
+Uint8 keysactive[SDL_NUM_SCANCODES];
 
 bool new_text;
 char last_text[128];//SDL_TEXTINPUTEVENT_TEXT_SIZE];
@@ -63,12 +66,12 @@ void flush_events_buffer(void)
 
 void wait_input(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 {
-#if 0	
+#if 1	
 	service_SDL_events(false);
-	while (!((keyboard && keydown) || (mouse && mousedown) || (joystick && joydown)))
+	while (!((keyboard && keydown))) // || (mouse && mousedown) || (joystick && joydown)))
 	{
-		SDL_Delay(SDL_POLL_INTERVAL);
-		push_joysticks_as_keyboard();
+		n64_Delay(SDL_POLL_INTERVAL);
+		//push_joysticks_as_keyboard();
 		service_SDL_events(false);
 
 #ifdef WITH_NETWORK
@@ -81,12 +84,12 @@ void wait_input(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 
 void wait_noinput(JE_boolean keyboard, JE_boolean mouse, JE_boolean joystick)
 {
-#if 0	
+#if 1	
 	service_SDL_events(false);
-	while ((keyboard && keydown) || (mouse && mousedown) || (joystick && joydown))
+	while ((keyboard && keydown))// || (mouse && mousedown) || (joystick && joydown))
 	{
-		SDL_Delay(SDL_POLL_INTERVAL);
-		poll_joysticks();
+		n64_Delay(SDL_POLL_INTERVAL);
+//		poll_joysticks();
 		service_SDL_events(false);
 
 #ifdef WITH_NETWORK
@@ -149,6 +152,7 @@ void mouseGetRelativePosition(Sint32 *const out_x, Sint32 *const out_y)
 	mouseWindowYRelative = 0;
 #endif
 }
+extern input_event_t input_queue[1024];
 
 void service_SDL_events(JE_boolean clear_new)
 {
@@ -160,6 +164,313 @@ void service_SDL_events(JE_boolean clear_new)
 		newmouse = false;
 		new_text = false;
 	}
+#if 0
+	struct controller_data keys_pressed;
+	struct controller_data keys_held;
+	struct controller_data keys_released;
+
+	controller_scan();
+
+	keys_pressed = get_keys_down();
+	keys_held = get_keys_held();
+	keys_released = get_keys_up();
+
+	struct SI_condat pressed = keys_pressed.c[0];
+	struct SI_condat held = keys_held.c[0];
+
+//keydown = false;
+	if (pressed.A || held.A) {
+		keysactive[SDL_SCANCODE_SPACE] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_SPACE;
+		lastkey_mod = 0;
+		keydown = true;
+
+//		//mouseInactive = true;
+		return;
+	}
+	if (pressed.B || held.B) {
+		keysactive[SDL_SCANCODE_RETURN] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_RETURN;
+		lastkey_mod = 0;
+		keydown = true;
+
+//		//mouseInactive = true;
+		return;
+	}
+//	if (pressed.C_up) {
+//		input.lastChar = KEY_c;
+//		input.code = true;
+//	}
+	if (pressed.up || held.up) {
+		keysactive[SDL_SCANCODE_UP] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_UP;
+		lastkey_mod = 0;
+		keydown = true;
+
+		//mouseInactive = true;
+		return;
+	}
+	if (pressed.down || held.down) {
+		keysactive[SDL_SCANCODE_DOWN] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_DOWN;
+		lastkey_mod = 0;
+		keydown = true;
+
+		//mouseInactive = true;
+		return;
+	}
+	if (pressed.left || held.left) {
+		keysactive[SDL_SCANCODE_LEFT] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_LEFT;
+		lastkey_mod = 0;
+		keydown = true;
+
+		//mouseInactive = true;
+		return;
+	}
+	if (pressed.right || held.right) {
+		keysactive[SDL_SCANCODE_RIGHT] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_RIGHT;
+		lastkey_mod = 0;
+		keydown = true;
+
+		//mouseInactive = true;
+		return;
+	}
+	if (pressed.start || held.start) {
+		keysactive[SDL_SCANCODE_ESCAPE] = 1;
+
+		newkey = true;
+		lastkey_scan = SDL_SCANCODE_ESCAPE;
+		lastkey_mod = 0;
+		keydown = true;
+
+		//mouseInactive = true;
+		return;
+	}
+
+	struct SI_condat released = keys_released.c[0];
+
+	if (released.A) {
+		keysactive[SDL_SCANCODE_SPACE] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+	if (released.B) {
+		keysactive[SDL_SCANCODE_RETURN] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+	if (released.up) {
+		keysactive[SDL_SCANCODE_UP] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+	if (released.down) {
+		keysactive[SDL_SCANCODE_DOWN] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+	if (released.left) {
+		keysactive[SDL_SCANCODE_LEFT] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+	if (released.right) {
+		keysactive[SDL_SCANCODE_RIGHT] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+	if (released.start) {
+		keysactive[SDL_SCANCODE_ESCAPE] = 0;
+		keydown = false;
+		//mouseInactive = true;
+		return;
+	}
+#endif
+//	for(size_t i=iq_start;i<iq_len;i++) {
+//		printf("%d %d\n", input_queue[i].down, input_queue[i].key);
+//	}
+	input_event_t ev;
+	while (pop_input_queue(&ev))
+	{
+		// released
+		if (ev.down == 0)
+		{  
+			if (ev.key == ctrlr_up) {
+				keysactive[SDL_SCANCODE_UP] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_down) {
+				keysactive[SDL_SCANCODE_DOWN] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_left) {
+				keysactive[SDL_SCANCODE_LEFT] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_right) {
+				keysactive[SDL_SCANCODE_RIGHT] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_l) {
+				keysactive[SDL_SCANCODE_LCTRL] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_r) {
+				keysactive[SDL_SCANCODE_LALT] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_a) {
+				keysactive[SDL_SCANCODE_SPACE] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_b) {
+				keysactive[SDL_SCANCODE_RETURN] = 0;
+				keydown = false;
+				return;
+			}
+			if (ev.key == ctrlr_start) {
+				keysactive[SDL_SCANCODE_PAUSE] = 0;
+				keydown = false;
+				return;
+			}	
+			return;
+		}
+		// pressed
+		else if (ev.down) 
+		{
+			if (ev.key == ctrlr_up) {
+				keysactive[SDL_SCANCODE_UP] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_UP;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_down) {
+				keysactive[SDL_SCANCODE_DOWN] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_DOWN;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_left) {
+				keysactive[SDL_SCANCODE_LEFT] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_LEFT;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_right) {
+				keysactive[SDL_SCANCODE_RIGHT] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_RIGHT;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_l) {
+				keysactive[SDL_SCANCODE_LCTRL] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_LCTRL;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_r) {
+				keysactive[SDL_SCANCODE_LALT] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_LALT;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_a) {
+				keysactive[SDL_SCANCODE_SPACE] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_SPACE;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_b) {
+				keysactive[SDL_SCANCODE_RETURN] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_RETURN;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_start) {
+				keysactive[SDL_SCANCODE_PAUSE] = 1;
+				newkey = true;
+				lastkey_scan = SDL_SCANCODE_PAUSE;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}	
+			return;
+		}
+	}
+	/*
+				case SDL_SCANCODE_UP:
+				{
+					JE_playSampleNum(S_CURSOR);
+
+					const size_t pickerItemsCount = selectedMenuItem->getPickerItemsCount();
+
+					pickerSelectedIndex = pickerSelectedIndex == 0
+						? pickerItemsCount - 1
+						: pickerSelectedIndex - 1;
+					break;
+				}
+				case SDL_SCANCODE_DOWN:
+				{
+					JE_playSampleNum(S_CURSOR);
+
+					const size_t pickerItemsCount = selectedMenuItem->getPickerItemsCount();
+
+					pickerSelectedIndex = pickerSelectedIndex == pickerItemsCount - 1
+						? 0
+						: pickerSelectedIndex + 1;
+					break;
+				}
+				case SDL_SCANCODE_SPACE:
+				case SDL_SCANCODE_RETURN:
+				{
+					action = true;
+					break;
+				}
+				case SDL_SCANCODE_ESCAPE:
+*/
 #if 0
 	while (SDL_PollEvent(&ev))
 	{
@@ -201,7 +512,7 @@ void service_SDL_events(JE_boolean clear_new)
 				lastkey_mod = ev.key.keysym.mod;
 				keydown = true;
 
-				mouseInactive = true;
+				//mouseInactive = true;
 				return;
 
 			case SDL_KEYUP:
@@ -225,11 +536,11 @@ void service_SDL_events(JE_boolean clear_new)
 				               mouse_y < 0 || mouse_y >= vga_height ? SDL_TRUE : SDL_FALSE);
 
 				if (ev.motion.xrel != 0 || ev.motion.yrel != 0)
-					mouseInactive = false;
+					//mouseInactive = false;
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
-				mouseInactive = false;
+				//mouseInactive = false;
 
 				// fall through
 			case SDL_MOUSEBUTTONUP:

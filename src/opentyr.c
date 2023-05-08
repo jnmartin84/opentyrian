@@ -426,7 +426,9 @@ void setupMenu(void)
 					currentMenu = menuParents[currentMenu];
 				}
 			}
-			else if (newkey)
+			else 
+#endif
+			if (newkey)
 			{
 				switch (lastkey_scan)
 				{
@@ -511,7 +513,7 @@ void setupMenu(void)
 					break;
 				}
 			}
-#endif
+
 			if (action)
 			{
 				const MenuItemId selectedMenuItemId = menuItems[*selectedMenuItemIndex].id;
@@ -671,7 +673,9 @@ void setupMenu(void)
 					currentPicker = MENU_ITEM_NONE;
 				}
 			}
-			else if (newkey)
+			else 
+#endif			
+			if (newkey)
 			{
 				switch (lastkey_scan)
 				{
@@ -714,7 +718,7 @@ void setupMenu(void)
 					break;
 				}
 			}
-#endif
+
 			if (action)
 			{
 				JE_playSampleNum(S_CLICK);
@@ -756,15 +760,206 @@ void setupMenu(void)
 		}
 	}
 }
+
+input_event_t input_queue[1024];
+size_t iq_len = 0;
+size_t iq_start = 0;
+
+
+void reset_input_queue(void) {
+iq_len = 0;
+iq_start = 0;
+}
+
+bool pop_input_queue(input_event_t *ev) {
+	if(iq_len == 0) {
+		return false;
+	}
+	else if(iq_len > 0 && iq_start < iq_len) {
+	//ev = &input_queue[iq_start];
+	ev->down = input_queue[iq_start].down;
+	ev->key = input_queue[iq_start].key;
+	iq_start++;
+	return true;
+	}
+	else {
+		reset_input_queue();
+		return false;
+	}
+}
+
+void update_input_queue(void) {
+	struct controller_data keys_pressed;
+	struct controller_data keys_released;
+
+	controller_scan();
+
+	keys_pressed = get_keys_down();
+	keys_released = get_keys_up();
+
+	struct SI_condat pressed = keys_pressed.c[0];
+	struct SI_condat released = keys_released.c[0];
+
+	if (iq_len > 1023) {
+		return;
+	}
+
+	if (pressed.A) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_a;
+		iq_len++;
+	}
+	if (pressed.B) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_b;
+		iq_len++;
+	}
+	if (pressed.Z) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_z;
+		iq_len++;
+	}
+	if (pressed.L) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_l;
+		iq_len++;
+	}
+	if (pressed.R	) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_r;
+		iq_len++;
+	}
+	if (pressed.up) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_up;
+		iq_len++;
+	}
+	if (pressed.down) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_down;
+		iq_len++;
+	}
+	if (pressed.left) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_left;
+		iq_len++;
+	}
+	if (pressed.right) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_right;
+		iq_len++;
+	}
+	if (pressed.start) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_start;
+		iq_len++;
+	}
+	if (pressed.C_up) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_c_up;
+		iq_len++;
+	}
+	if (pressed.C_down) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_c_down;
+		iq_len++;
+	}
+	if (pressed.C_left) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_c_left;
+		iq_len++;
+	}
+	if (pressed.C_right) {
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_c_right;
+		iq_len++;
+	}
+	
+	if (released.A) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_a;
+		iq_len++;
+	}
+	if (released.B) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_b;
+		iq_len++;
+	}
+	if (released.Z) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_z;
+		iq_len++;
+	}
+	if (released.L) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_l;
+		iq_len++;
+	}
+	if (released.R	) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_r;
+		iq_len++;
+	}
+	if (released.up) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_up;
+		iq_len++;
+	}
+	if (released.down) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_down;
+		iq_len++;
+	}
+	if (released.left) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_left;
+		iq_len++;
+	}
+	if (released.right) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_right;
+		iq_len++;
+	}
+	if (released.start) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_start;
+		iq_len++;
+	}
+	if (released.C_up) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_c_up;
+		iq_len++;
+	}
+	if (released.C_down) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_c_down;
+		iq_len++;
+	}
+	if (released.C_left) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_c_left;
+		iq_len++;
+	}
+	if (released.C_right) {
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_c_right;
+		iq_len++;
+	}
+}	
+
+
 static volatile uint64_t timekeeping = 0;
 
 void tickercb(int o) {
+	if((timekeeping % 34) == 0) {
+	update_input_queue();
+	}
 	timekeeping+=1;
 }
 
 uint32_t n64_GetTicks() {
 	// 1 tick == 1 ms
-	return (timekeeping);
+	return (uint32_t)(timekeeping&0xFFFFFFFF);
 }
 
 __attribute__ ((optimize(0))) void n64_Delay(uint32_t duration)
@@ -823,8 +1018,8 @@ int main(int argc, char *argv[])
 
     // center joystick...
     controller_scan();
-    struct controller_data keys_pressed = get_keys_down();
-    struct SI_condat pressed = keys_pressed.c[0];
+//    struct controller_data keys_pressed = get_keys_down();
+//    struct SI_condat pressed = keys_pressed.c[0];
 	timer_init();
 	timekeeping = 0;
 	/* timer_link_t* tick_timer = */
@@ -893,11 +1088,11 @@ int main(int argc, char *argv[])
 	youAreCheating = false;
 	smoothScroll = true;
 	loadDestruct = false;
-
+reset_input_queue();
 #if 1
 	if (!audio_disabled)
 	{
-		printf("initializing SDL audio...\n");
+		printf("initializing audio...\n");
 
 		init_audio();
 
@@ -942,7 +1137,7 @@ int main(int argc, char *argv[])
 		JE_initPlayerData();
 		JE_sortHighScores();
 
-		play_demo = true;
+		play_demo = false;//true;
 		stopped_demo = false;
 
 		gameLoaded = false;
@@ -955,7 +1150,7 @@ int main(int argc, char *argv[])
 		}
 		else
 #endif
-#if 0
+#if 1
 		{
 			if (!titleScreen())
 			{

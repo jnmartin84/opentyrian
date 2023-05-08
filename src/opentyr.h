@@ -98,6 +98,36 @@ typedef float  JE_real;
 extern const char *opentyrian_str;
 extern const char *opentyrian_version;
 
+
+typedef enum {
+    ctrlr_up,
+	ctrlr_right,
+	ctrlr_down,
+	ctrlr_left,
+	ctrlr_start,
+	ctrlr_l,
+	ctrlr_r,
+	ctrlr_z,
+	ctrlr_b,
+	ctrlr_a,
+	ctrlr_c_up,
+	ctrlr_c_right,
+	ctrlr_c_down,
+	ctrlr_c_left
+} evt_key_t;
+
+typedef struct input_event_s {
+
+    int down; // 0 = no, 1 = yes    
+    evt_key_t key;
+
+} input_event_t;
+
+void reset_input_queue(void);
+void update_input_queue(void);
+bool pop_input_queue(input_event_t *ev);
+uint32_t n64_GetTicks();
+void n64_Delay(uint32_t tick);
 void setupMenu(void);
 #define SOUND_SAMPLE_RATE 11025
 //11025

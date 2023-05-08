@@ -169,7 +169,6 @@ void fade_solid(color_t color, int steps, unsigned int first_color, unsigned int
 
 void fade_black(int steps)
 {
-	// FIXME
 	color_t black = { 0, 0, 0 };
 	fade_solid(black, steps, 0, 255);
 }

@@ -64,36 +64,13 @@ extern void *__safe_buffer[];
 
 void init_video(void)
 {
-				    console_clear();
-    console_close();
-memset((uint16_t *)(__safe_buffer[0]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
+	console_clear();
+	console_close();
+	memset((uint16_t *)(__safe_buffer[0]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
     memset((uint16_t *)(__safe_buffer[1]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
 
-	    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
-
-	#if 0
-	if (SDL_WasInit(SDL_INIT_VIDEO))
-		return;
-
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1)
-	{
-		fprintf(stderr, "error: failed to initialize SDL video: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	// Create the software surfaces that the game renders to. These are all 320x200x8 regardless
-	// of the window size or monitor resolution.
-	VGAScreen = VGAScreenSeg = SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	VGAScreen2 = SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	game_screen = SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-
-	// The game code writes to surface->pixels directly without locking, so make sure that we
-	// indeed created software surfaces that support this.
-	assert(!SDL_MUSTLOCK(VGAScreen));
-	assert(!SDL_MUSTLOCK(VGAScreen2));
-	assert(!SDL_MUSTLOCK(game_screen));
-#endif
-VGAScreenSeg = malloc(320*200);
+	display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
+	VGAScreenSeg = malloc(320*200);
 	VGAScreen = VGAScreenSeg;// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
 	VGAScreen2 = malloc(320*200);//SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
 	game_screen = malloc(320*200);// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);

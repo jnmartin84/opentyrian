@@ -198,7 +198,9 @@ bool xmas_prompt(void)
 				cancel = true;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -231,7 +233,7 @@ bool xmas_prompt(void)
 				break;
 			}
 		}
-#endif
+
 		if (action || cancel)
 		{
 			fade_black(10);

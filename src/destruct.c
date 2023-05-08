@@ -753,7 +753,7 @@ static void JE_introScreen(void)
 	while (!newkey)
 	{
 		// FIXME
-		//service_SDL_events(false);
+		service_SDL_events(false);
 		n64_Delay(16);
 	}
 
@@ -805,8 +805,7 @@ static enum de_mode_t JE_modeSelect(void)
 		newkey = false;
 		do
 		{
-			// FIXME
-			//service_SDL_events(false);
+			service_SDL_events(false);
 			n64_Delay(16);
 		} while (!newkey);
 		// FIXME
@@ -1395,7 +1394,7 @@ static void JE_helpScreen(void)
 	do  /* wait until user hits a key */
 	{
 		// FIXME
-		//service_SDL_events(true);
+		service_SDL_events(true);
 		n64_Delay(16);
 	} while (!newkey);
 
@@ -1418,7 +1417,7 @@ static void JE_pauseScreen(void)
 	do  /* wait until user hits a key */
 	{
 		// FIXME
-		//service_SDL_events(true);
+		service_SDL_events(true);
 		n64_Delay(16);
 	} while (!newkey);
 

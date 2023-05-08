@@ -2219,8 +2219,8 @@ draw_player_shot_loop_end:
 			if (skipStarShowVGA)
 				goto level_loop;
 		}
-#if 0
-		if (pause_pressed || !windowHasFocus)
+#if 1
+		if (pause_pressed)// || !windowHasFocus)
 		{
 			pause_pressed = false;
 
@@ -3365,16 +3365,15 @@ bool titleScreen(void)
 		JE_mouseStartFilter(0xF0);
 		JE_showVGA();
 		JE_mouseReplace();
-// FIXME
-		const Uint32 idleStartTick = 0;//n64_GetTicks();
+
+		const Uint32 idleStartTick = n64_GetTicks();
 
 		bool mouseMoved = false;
 		do
 		{
 
 			// Play demo after idle for 30 seconds.
-			// FIXME
-			if (/*n64_GetTicks() -*/ idleStartTick > 30000)
+			if (n64_GetTicks() - idleStartTick > 30000)
 			{
 				fade_black(15);
 
@@ -3382,8 +3381,7 @@ bool titleScreen(void)
 				return true;
 			}
 
-// FIXME
-//			SDL_Delay(16);
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -3441,7 +3439,9 @@ bool titleScreen(void)
 				done = true;
 			}
 		}
-		else if (newkey)
+		else
+#endif
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -3479,7 +3479,7 @@ bool titleScreen(void)
 				break;
 			}
 		}
-#endif
+
 		if (new_text)
 		{
 			for (size_t ti = 0U; last_text[ti] != '\0'; ++ti)

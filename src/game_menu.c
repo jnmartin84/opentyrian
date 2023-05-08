@@ -979,7 +979,7 @@ void JE_itemScreen(void)
 				service_SDL_events(false);
 //				mouseButton = JE_mousePosition(&mouseX, &mouseY);
 				inputDetected = newkey;// || mouseButton > 0;
-#if 0
+#if 1
 				if (curMenu != MENU_LOAD_SAVE)
 				{
 					if (keysactive[SDL_SCANCODE_S] && (keysactive[SDL_SCANCODE_LALT] || keysactive[SDL_SCANCODE_RALT]))
@@ -1014,7 +1014,7 @@ void JE_itemScreen(void)
 
 				if (curMenu == MENU_DATA_CUBE_SUB)
 				{
-					if (mouseButton > 0 && mouseCursor != MOUSE_POINTER_NORMAL)
+/*					if (mouseButton > 0 && mouseCursor != MOUSE_POINTER_NORMAL)
 					{
 						inputDetected = false;
 						if (mouseCursor == MOUSE_POINTER_UP)
@@ -1022,7 +1022,7 @@ void JE_itemScreen(void)
 						else
 							yChg = 1;
 					}
-
+*/
 					if (keysactive[SDL_SCANCODE_PAGEUP])
 					{
 						yChg = -2;
@@ -1240,7 +1240,7 @@ void JE_itemScreen(void)
 			}
 		}
 		else 
-		
+#endif		
 		if (newkey)
 		{
 			switch (lastkey_scan)
@@ -1329,8 +1329,7 @@ void JE_itemScreen(void)
 					backFromHelp = true;
 				}
 				break;
-			// fixme
-			case 0://SDL_SCANCODE_UP:
+			case SDL_SCANCODE_UP:
 				keyboardUsed = true;
 				lastDirection = -1;
 
@@ -1360,8 +1359,7 @@ void JE_itemScreen(void)
 				}
 
 				break;
-			// fixme
-			case 1://SDL_SCANCODE_DOWN:
+			case SDL_SCANCODE_DOWN:
 				keyboardUsed = true;
 				lastDirection = 1;
 
@@ -1391,20 +1389,17 @@ void JE_itemScreen(void)
 				}
 
 				break;
-			// fixme
-			case 2://SDL_SCANCODE_HOME:
+			case SDL_SCANCODE_HOME:
 				if (curMenu == MENU_DATA_CUBE_SUB)
 					yLoc = 0;
 				break;
 
-			// fixme
-			case 3://SDL_SCANCODE_END:
+			case SDL_SCANCODE_END:
 				if (curMenu == MENU_DATA_CUBE_SUB)
 					yLoc = (cube[currentCube].last_line - 9) * 12;
 				break;
 
-			// fixme
-			case 4://SDL_SCANCODE_LEFT:
+			case SDL_SCANCODE_LEFT:
 				if (curMenu == MENU_JOYSTICK_CONFIG)
 				{
 					if (joysticks > 0)
@@ -1502,8 +1497,7 @@ void JE_itemScreen(void)
 				}
 				break;
 
-			// fixme
-			case 5://SDL_SCANCODE_RIGHT:
+			case SDL_SCANCODE_RIGHT:
 				if (curMenu == MENU_JOYSTICK_CONFIG)
 				{
 					if (joysticks > 0)
@@ -1600,7 +1594,6 @@ void JE_itemScreen(void)
 				break;
 			}
 		}
-#endif
 	} while (!(quit || gameLoaded || jumpSection));
 
 #ifdef WITH_NETWORK
@@ -2438,8 +2431,6 @@ JE_boolean JE_quitRequest(void)
 		}
 		else if (newkey)
 		{
-// FIXME
-#if 0
 			switch (lastkey_scan)
 			{
 				case SDL_SCANCODE_LEFT:
@@ -2459,7 +2450,6 @@ JE_boolean JE_quitRequest(void)
 				default:
 					break;
 			}
-#endif			
 		}
 	}
 
@@ -2717,8 +2707,6 @@ void JE_menuFunction(JE_byte select)
 				wait_delay();
 			} while (!newkey && !mousedown && !joydown);
 
-	// fixme		
-#if 0
 			if (newkey)
 			{
 				// already used? then swap
@@ -2742,7 +2730,6 @@ void JE_menuFunction(JE_byte select)
 				
 				JE_wipeKey();
 			}
-#endif			
 		}
 		break;
 

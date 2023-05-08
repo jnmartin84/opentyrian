@@ -27,6 +27,9 @@ OBJDUMP = $(GCCN64PREFIX)objdump
 O=obj
 
 #		n64memory.o	\
+#		samplerate.o	\
+#		src_linear.o	\
+#		src_zoh.o	\
 
 OBJS=						\
 		animlib.o	\

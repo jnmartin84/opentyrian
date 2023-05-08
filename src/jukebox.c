@@ -119,8 +119,6 @@ void jukebox(void)  // FKA Setup.jukeboxGo
 
 		// quit on mouse click
 		Uint16 x, y;
-		// fixme
-#if 0		
 		if (JE_mousePosition(&x, &y) > 0)
 			trigger_quit = true;
 
@@ -184,7 +182,7 @@ void jukebox(void)  // FKA Setup.jukeboxGo
 				break;
 			}
 		}
-#endif		
+
 		// user wants to quit, start fade-out
 		if (trigger_quit && !quitting)
 		{

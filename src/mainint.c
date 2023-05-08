@@ -159,8 +159,7 @@ void JE_outCharGlow(JE_word x, JE_word y, const char *s)
 					if (levelWarningDisplay)
 						JE_updateWarning(VGAScreen);
 
-					// FIXME
-					//n64_Delay(16);
+					n64_Delay(16);
 				} while (!(getDelayTicks() == 0 || ESCPressed));
 
 				JE_showVGA();
@@ -266,7 +265,7 @@ void JE_helpSystem(JE_byte startTopic)
 		do
 		{
 			// FIXME
-			//n64_Delay(16);
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -323,7 +322,9 @@ void JE_helpSystem(JE_byte startTopic)
 				done = true;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -362,7 +363,7 @@ void JE_helpSystem(JE_byte startTopic)
 				break;
 			}
 		}
-#endif
+
 		if (action)
 		{
 			JE_playSampleNum(S_SELECT);
@@ -506,7 +507,7 @@ static bool helpSystemPage(Uint8 *topic, bool *restart)
 			JE_showVGA();
 			JE_mouseReplace();
 // FIXME
-//			n64_Delay(16);
+			n64_Delay(16);
 
 			push_joysticks_as_keyboard();
 			service_SDL_events(false);
@@ -542,7 +543,9 @@ static bool helpSystemPage(Uint8 *topic, bool *restart)
 				break;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -573,7 +576,6 @@ static bool helpSystemPage(Uint8 *topic, bool *restart)
 				break;
 			}
 		}
-#endif
 		if (done)
 		{
 			fade_black(15);
@@ -741,7 +743,7 @@ bool JE_loadScreen(void)
 		JE_mouseReplace();
 
 // FIXME
-#if 0
+#if 1
 		bool mouseMoved = false;
 		do
 		{
@@ -830,7 +832,10 @@ bool JE_loadScreen(void)
 				done = true;
 			}
 		}
-		else if (newkey)
+	
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -883,7 +888,7 @@ bool JE_loadScreen(void)
 				break;
 			}
 		}
-#endif
+
 		if (leftAction)
 		{
 			playersIndex = playersIndex == 0 ? 1 : 0;
@@ -1268,7 +1273,9 @@ void JE_highScoreScreen(void)
 				break;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -1299,7 +1306,7 @@ void JE_highScoreScreen(void)
 				break;
 			}
 		}
-#endif
+
 		if (leftAction)
 		{
 			episodeIndex = episodeIndex == 0
@@ -1710,7 +1717,9 @@ JE_boolean JE_inGameSetup(void)
 				done = true;
 			}
 		}
-		else if (newkey)
+		else 
+#endif		
+		if (newkey)
 		{
 			switch (lastkey_scan)
 			{
@@ -1768,7 +1777,7 @@ JE_boolean JE_inGameSetup(void)
 				break;
 			}
 		}
-#endif
+
 		if (action)
 		{
 			switch (selectedIndex)
@@ -2163,8 +2172,6 @@ void JE_highScoreCheck(void)
 					}
 					else if (newkey)
 					{
-// FIXME
-#if 0
 						switch (lastkey_scan)
 						{
 							case SDL_SCANCODE_BACKSPACE:
@@ -2185,7 +2192,6 @@ void JE_highScoreCheck(void)
 							default:
 								break;
 						}
-#endif
 					}
 				} while (!quit);
 
@@ -2998,8 +3004,6 @@ void JE_operation(JE_byte slot)
 			}
 			else if (newkey)
 			{
-// FIXME
-#if 0
 				switch (lastkey_scan)
 				{
 					case SDL_SCANCODE_BACKSPACE:
@@ -3023,7 +3027,6 @@ void JE_operation(JE_byte slot)
 					default:
 						break;
 				}
-#endif				
 			}
 		}
 	}
@@ -3398,7 +3401,6 @@ void JE_pauseGame(void)
 
 	do
 	{
-#if 0		
 		setDelay(2);
 
 		push_joysticks_as_keyboard();
@@ -3432,8 +3434,6 @@ void JE_pauseGame(void)
 #endif
 
 		wait_delay();
-#endif		
-done = true;
 	} while (!done);
 
 #ifdef WITH_NETWORK
