@@ -354,16 +354,18 @@ void JE_showVGA(void)
         _dc = lockVideo(1);
 		// 20*screenpitch to get it centered, * sizeof(pixel)
 		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
-		uint16_t *src16 = (uint16_t *)VGAScreen;
+		uint32_t *src32 = (uint32_t *)VGAScreen;
 
-		for (uint n=0;n<32000;n++)//=4)
+		for (uint n=0;n<16000;n++)
 		{
-			// read 2 8-bit pixels at a time from VGAScreen 
+			// read 4 8-bit pixels at a time from VGAScreen 
 			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
-			*dst32++ = tworgb_palette[*src16++];
-//			*dst32++ = tworgb_palette[*src16++];
-//			*dst32++ = tworgb_palette[*src16++];
-//			*dst32++ = tworgb_palette[*src16++];
+			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
+			uint32_t src_two = *src32++;
+			uint16_t src1 = (src_two >> 16);
+			uint16_t src2 = (src_two & 0xffff);
+			*dst32++ = tworgb_palette[src1];
+			*dst32++ = tworgb_palette[src2];
 		}
 		unlockVideo(_dc);
 }
