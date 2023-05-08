@@ -1608,7 +1608,6 @@ void adlib_getsample(Bit16s* sndptr, Bits numsamples) {
 		for (i=0;i<endsamples;i++) {
 			clipit16(outbufl[i],sndptr++);
 			sndptr++;
-			//*sndptr++ = (int16_t)outbufl[i];
 		}			
 #endif
 

@@ -96,7 +96,7 @@ void wait_delayorinput(void)
 		service_SDL_events(false);
 		poll_joysticks();
 
-		if (newkey || mousedown || joydown)
+		if (newkey) // || mousedown || joydown)
 		{
 			newkey = false;
 			return;
@@ -109,8 +109,6 @@ void wait_delayorinput(void)
 		n64_Delay(MIN(delay, SDL_POLL_INTERVAL));
 	}
 }
-
-#include "samplerate.h"
 
 void loadSndFile(bool xmas)
 {
@@ -199,16 +197,6 @@ void loadSndFile(bool xmas)
 	dfs_close(f);
 
 	// Convert samples to output sample format and rate.
-	//SDL_AudioCVT cvt;
-	//if (SDL_BuildAudioCVT(&cvt, AUDIO_S8, 1, 11025, AUDIO_S16SYS, 1, audioSampleRate) < 0)
-	//{
-	//	fprintf(stderr, "error: Failed to build audio converter: %s\n", SDL_GetError());
-
-	//	for (int i = 0; i < SOUND_COUNT; ++i)
-	//		soundSampleCount[i] = 0;
-
-	//	return;
-	//}
 	Sint16 *cvt_buf;
 	size_t maxSampleSize = 0;
 	for (size_t i = 0; i < SOUND_COUNT; ++i)
@@ -216,34 +204,24 @@ void loadSndFile(bool xmas)
 		maxSampleSize = MAX(maxSampleSize, soundSampleCount[i]);
 	}
 
-	cvt_buf = malloc(maxSampleSize * 2);
+	cvt_buf = malloc(maxSampleSize * sizeof (Sint16));
 
 	for (size_t i = 0; i < SOUND_COUNT; ++i)
 	{
 		size_t cvt_len = soundSampleCount[i];
-//		memcpy(cvt_buf, soundSamples[i], cvt_len);
-
-//		if (SDL_ConvertAudio(&cvt))
-//		{
-//			fprintf(stderr, "error: Failed to convert audio: %s\n", SDL_GetError());
-//
-//			soundSampleCount[i] = 0;
-//
-//			continue;
-//		}
-
-// 11025
+		// 11025 hz, we can just convert from 8 to 16 bit, no resample
 		for (size_t samp_i = 0; samp_i < cvt_len; samp_i++)
 		{
-			Sint16 s1 = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i)*127;
+			// * 256 makes everything clip and sound like trash
+			Sint16 s1 = *(Sint8 *)(((Sint8*)soundSamples[i]) + samp_i) * 128;
 			cvt_buf[samp_i] = s1;
 		}
 
 		free(soundSamples[i]);
-		soundSamples[i] = malloc(cvt_len * 2);
+		soundSamples[i] = malloc(cvt_len * sizeof (Sint16));
 
-		memcpy(soundSamples[i], cvt_buf, cvt_len * 2);
-		soundSampleCount[i] = cvt_len;//*2 / sizeof (Sint16);
+		memcpy(soundSamples[i], cvt_buf, cvt_len * sizeof (Sint16));
+		soundSampleCount[i] = cvt_len;
 	}
 
 	free(cvt_buf);
@@ -251,7 +229,6 @@ void loadSndFile(bool xmas)
 
 die:
 	fprintf(stderr, "error: Unexpected data was read from a file.\n");
-//	SDL_Quit();
 	exit(EXIT_FAILURE);
 }
 

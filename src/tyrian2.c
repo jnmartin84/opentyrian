@@ -3044,10 +3044,8 @@ new_game:
 		fread_u8_die( &eventRec[x].eventdat4, 1, level_f);
 	}
 	eventRec[x].eventtime = 65500;  /*Not needed but just in case*/
-//printf("Level loaded.\n");
 	/*debuginfo('Level loaded.');*/
 
-//printf("Loading Map.\n");
 	/*debuginfo('Loading Map');*/
 
 	/* MAP SHAPE LOOKUP TABLE - Each map is directly after level */
@@ -3056,7 +3054,7 @@ new_game:
 		fread_u16_die(mapSh[temp], sizeof(*mapSh) / sizeof(JE_word), level_f);
 		for (temp2 = 0; temp2 < 128; temp2++)
 		{
-			mapSh[temp][temp2] = /*SDL_Swap16*/SHORT(mapSh[temp][temp2]);
+			mapSh[temp][temp2] = SHORT(mapSh[temp][temp2]);
 		}
 	}
 
@@ -3397,6 +3395,8 @@ bool titleScreen(void)
 		bool action = false;
 		bool done = false;
 
+// FIXME
+#if 0
 		if (mouseMoved || newmouse)
 		{
 			// Find menu item that was hovered or clicked.
@@ -3414,22 +3414,18 @@ bool titleScreen(void)
 
 							selectedIndex = i;
 						}
-// FIXME
-#if 0
 						if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
 						    lastmouse_x >= xMenuItem && lastmouse_x < xMenuItem + wMenuItem[i] &&
 						    lastmouse_y >= yMenuItem && lastmouse_y < yMenuItem + hMenuItem)
 						{
 							action = true;
 						}
-#endif
 						break;
 					}
 				}
 			}
 		}
-// FIXME
-#if 0
+
 		if (newmouse)
 		{
 			if (lastmouse_but == SDL_BUTTON_RIGHT)
@@ -3701,8 +3697,7 @@ void newSuperTyrianGame(void)
 {
 	/* SuperTyrian */
 
-	// FIXME
-	initialDifficulty = /*keysactive[SDL_SCANCODE_SCROLLLOCK] ? DIFFICULTY_SUICIDE :*/ DIFFICULTY_ZINGLON;
+	initialDifficulty = keysactive[SDL_SCANCODE_SCROLLLOCK] ? DIFFICULTY_SUICIDE : DIFFICULTY_ZINGLON;
 
 	JE_clr256(VGAScreen);
 	JE_outText(VGAScreen, 10, 10, "Cheat codes have been disabled.", 15, 4);
@@ -3902,9 +3897,9 @@ uint JE_makeEnemy(struct JE_SingleEnemyType *enemy, Uint16 eDatI, Sint16 uniqueS
 	
 	if (sprite2s != NULL)
 		enemy->sprite2s = sprite2s;
-	else
-		// Use shape table value from previous enemy that occupied the enemy slot. (Ex. APPROACH.)
-		fprintf(stderr, "warning: ignoring sprite from unloaded shape table %d\n", shapeTableI);
+	//else
+		//// Use shape table value from previous enemy that occupied the enemy slot. (Ex. APPROACH.)
+		//fprintf(stderr, "warning: ignoring sprite from unloaded shape table %d\n", shapeTableI);
 
 	enemy->enemydatofs = &enemyDat[eDatI];
 
@@ -4424,7 +4419,7 @@ void JE_eventSystem(void)
 	case 16:
 		if (eventRec[eventLoc-1].eventdat > 9)
 		{
-			fprintf(stderr, "warning: event 16: bad event data\n");
+			//fprintf(stderr, "warning: event 16: bad event data\n");
 		}
 		else
 		{
@@ -5107,7 +5102,7 @@ void JE_eventSystem(void)
 		break;
 
 	default:
-		fprintf(stderr, "warning: ignoring unknown event %d\n", eventRec[eventLoc-1].eventtype);
+		//fprintf(stderr, "warning: ignoring unknown event %d\n", eventRec[eventLoc-1].eventtype);
 		break;
 	}
 

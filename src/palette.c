@@ -35,6 +35,8 @@ int palette_count;
 static Palette palette;
 Uint32 rgb_palette[256], yuv_palette[256];
 
+Uint32 tworgb_palette[65536];
+
 Palette colors;
 
 void JE_loadPals(void)
@@ -70,9 +72,16 @@ void set_palette(Palette colors, unsigned int first_color, unsigned int last_col
 	for (uint i = first_color; i <= last_color; ++i)
 	{
 		palette[i] = colors[i];
-		rgb_palette[i] = //SDL_MapRGB(main_window_tex_format, 
-		graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
+		rgb_palette[i] = graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
+	}
+
+	for (uint x = 0; x < 256; x++)
+	{
+		for (uint y = 0; y < 256; y++)
+		{
+			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
+		}
 	}
 }
 
@@ -81,9 +90,16 @@ void set_colors(color_t color, unsigned int first_color, unsigned int last_color
 	for (uint i = first_color; i <= last_color; ++i)
 	{
 		palette[i] = color;
-		rgb_palette[i] = //SDL_MapRGB(main_window_tex_format, 
-		graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
+		rgb_palette[i] = graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
+	}
+
+	for (uint x = 0; x < 256; x++)
+	{
+		for (uint y = 0; y < 256; y++)
+		{
+			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
+		}
 	}
 }
 
@@ -123,9 +139,16 @@ void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, un
 		palette[i].g += delta[1];
 		palette[i].b += delta[2];
 		
-		rgb_palette[i] = //SDL_MapRGB(main_window_tex_format, 
-		graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
+		rgb_palette[i] = graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
+	}
+
+	for (uint x = 0; x < 256; x++)
+	{
+		for (uint y = 0; y < 256; y++)
+		{
+			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
+		}
 	}
 }
 

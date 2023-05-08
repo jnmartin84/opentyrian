@@ -71,15 +71,7 @@ const char *data_dir(void)
 // prepend directory and fopen
 int dir_fopen(const char *dir, const char *file, const char *mode)
 {
-//	char *path = malloc(strlen(dir) + 1 + strlen(file) + 1);
-//printf("trying to open... %s\n", file);
-//printf("\n\n\n");
-//	sprintf(path, "%s/%s", dir, file);
 	int f = dfs_open(file);
-	//fopen(path, mode);
-
-//	free(path);
-
 	return f;
 }
 
@@ -87,28 +79,23 @@ int dir_fopen(const char *dir, const char *file, const char *mode)
 int dir_fopen_warn(const char *dir, const char *file, const char *mode)
 {
 	int f = dir_fopen(dir, file, mode);
-
 //	if (f < 0)
 //		printf("warning: failed to open '%s': %s\n", file, strerror(errno));
-
-//	while(1) {}
-
 	return f;
 }
 
 // die when dir_fopen fails
 int dir_fopen_die(const char *dir, const char *file, const char *mode)
 {
-	//FILE *f 
 	int f = dir_fopen(dir, file, mode);
-//printf("handle %d name %s\n", f, file);
-	if (f < 0) //== NULL)
+	if (f < 0)
 	{
-		while(1) {		
+		while(1)
+		{		
 			printf("error: failed to open '%s': %s\n", file, strerror(errno));
 			printf("error: One or more of the required Tyrian " TYRIAN_VERSION " data files could not be found.\n"
-		            "       Please read the README file.\n");
-}
+		           "       Please read the README file.\n");
+		}
 		JE_tyrianHalt(1);
 	}
 
@@ -142,11 +129,10 @@ void fread_die(void *buffer, size_t size, size_t count, int stream)
 	size_t result = dfs_read(buffer, size, count, stream);
 	if (result != (size*count))
 	{
-		//printf("\n\n\n\n");
-		//printf("stream %d result %d count %d\n", stream, result, count);
-		printf("error: An unexpected problem occurred while reading from a file.\n");
-		while(1) {}
-		//SDL_Quit();
+		while(1)
+		{
+			printf("error: An unexpected problem occurred while reading from a file.\n");
+		}
 		exit(EXIT_FAILURE);
 	}
 }

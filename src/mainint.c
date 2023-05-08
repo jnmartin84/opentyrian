@@ -170,7 +170,6 @@ void JE_outCharGlow(JE_word x, JE_word y, const char *s)
 
 void JE_drawPortConfigButtons(void) // rear weapon pattern indicator
 {
-	//printf("drawPortConfigButtons\n");
 	if (twoPlayerMode)
 		return;
 
@@ -1415,7 +1414,7 @@ void JE_doInGameSetup(void)
 		quitRequested = false;
 
 // FIXME
-//		keysactive[SDL_SCANCODE_ESCAPE] = false;
+		keysactive[SDL_SCANCODE_ESCAPE] = false;
 
 #ifdef WITH_NETWORK
 		if (isNetworkGame)
@@ -2735,9 +2734,8 @@ void JE_endLevelAni(void)
 	frameCountMax = 4;
 	textGlowFont = SMALL_FONT_SHAPES;
 
-// FIXME
-//	SDL_Color white = { 255, 255, 255 };
-//	set_colors(white, 254, 254);
+	color_t white = { 255, 255, 255 };
+	set_colors(white, 254, 254);
 
 	if (!levelTimer || levelTimerCountdown > 0 || !(episodeNum == 4))
 		JE_playSampleNum(V_LEVEL_END);
@@ -3110,7 +3108,7 @@ void JE_mainKeyboardInput(void)
 	JE_gammaCheck();
 
 // fixme
-#if 0
+#if 1
 	/* { Network Request Commands } */
 
 	if (!isNetworkGame)

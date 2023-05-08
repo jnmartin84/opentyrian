@@ -437,7 +437,6 @@ void JE_drawOptionLevel(void)
 			fill_rectangle_xy(VGAScreenSeg, 268, 127 + (temp - 1) * 6, 269, 127 + 3 + (temp - 1) * 6, 193 + ((player[1].items.sidekick_level - 100) == temp) * 11);
 		}
 	}
-//	printf("end drawoptionlevel\n");
 }
 
 void JE_tyrianHalt(JE_byte code)

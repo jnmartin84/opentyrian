@@ -34,7 +34,7 @@ JE_boolean JE_anyButton(void)
 {
 	poll_joysticks();
 	service_SDL_events(true);
-	return newkey || mousedown || joydown;
+	return newkey;// || mousedown || joydown;
 }
 
 void JE_dBar3(uint8_t *surface, JE_integer x,  JE_integer y,  JE_integer num,  JE_integer col)

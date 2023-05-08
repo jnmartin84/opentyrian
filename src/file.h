@@ -49,7 +49,6 @@ static inline void fread_bool_die(bool *buffer, int stream)
 // 8-bit fread
 static inline size_t fread_u8(Uint8 *buffer, size_t count, int stream)
 {
-//	return fread(buffer, sizeof(Uint8), count, stream);
 	return dfs_read(buffer, sizeof(Uint8), count, stream);
 }
 

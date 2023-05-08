@@ -95,49 +95,6 @@ bool init_audio(void)
 	opl_init();
 
 	return true;
-#if 0
-	SDL_AudioSpec ask, got;
-
-	ask.freq = 11025 * OUTPUT_QUALITY;
-	ask.format = AUDIO_S16SYS;
-	ask.channels = 1;
-	ask.samples = 256 * OUTPUT_QUALITY; // ~23 ms
-	ask.callback = audioCallback;
-
-	if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-	{
-		fprintf(stderr, "error: failed to initialize SDL audio: %s\n", SDL_GetError());
-		audio_disabled = true;
-		return false;
-	}
-
-	int allowedChanges = SDL_AUDIO_ALLOW_FREQUENCY_CHANGE;
-#if SDL_VERSION_ATLEAST(2, 0, 9)
-	allowedChanges |= SDL_AUDIO_ALLOW_SAMPLES_CHANGE;
-#endif
-	audioDevice = SDL_OpenAudioDevice(/*device*/ NULL, /*iscapture*/ 0, &ask, &got, allowedChanges);
-
-	if (audioDevice == 0)
-	{
-		fprintf(stderr, "error: SDL failed to open audio device: %s\n", SDL_GetError());
-		audio_disabled = true;
-		return false;
-	}
-
-	audioSampleRate = got.freq;
-
-	samplesPerLdsUpdate = 2 * (audioSampleRate / ldsUpdate2Rate);
-	samplesPerLdsUpdateFrac = 2 * (audioSampleRate % ldsUpdate2Rate);
-
-	volumeFactorTable[0] = 0;
-	for (size_t i = 1; i < 256; ++i)
-		volumeFactorTable[i] = TO_FIXED(powf(10, (255 - i) * (-volumeRange / (20.0f * 255))));
-
-	opl_init();
-
-	SDL_PauseAudioDevice(audioDevice, 0); // unpause
-	return true;
-#endif
 }
 
 void audioCallback(void *userdata, Uint8 *stream, int size)
@@ -272,20 +229,9 @@ void deinit_audio(void)
 {
 	if (audio_disabled)
 		return;
-#if 0
-	if (audioDevice != 0)
-	{
-		SDL_PauseAudioDevice(audioDevice, 1); // pause
-		SDL_CloseAudioDevice(audioDevice);
-		audioDevice = 0;
-	}
-
-	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 
 	memset(channelSampleCount, 0, sizeof channelSampleCount);
-
 	lds_free();
-#endif	
 }
 
 void load_music(void)  // FKA NortSong.loadSong
@@ -322,81 +268,50 @@ void play_song(unsigned int song_num)  // FKA NortSong.playSong
 
 	if (audio_disabled)
 		return;
-#if 1
+
 	if (song_num != song_playing)
 	{
-//		SDL_LockAudioDevice(audioDevice);
-
 		music_stopped = true;
-
-//		SDL_UnlockAudioDevice(audioDevice);
-
 		load_song(song_num);
-
 		song_playing = song_num;
 	}
 
-//	SDL_LockAudioDevice(audioDevice);
-
 	music_stopped = false;
-
-//	SDL_UnlockAudioDevice(audioDevice);
-#endif	
 }
 
 void restart_song(void)  // FKA Player.selectSong(1)
 {
 	if (audio_disabled)
 		return;
-#if 1
-//	SDL_LockAudioDevice(audioDevice);
 
 	lds_rewind();
 
 	music_stopped = false;
-
-//	SDL_UnlockAudioDevice(audioDevice);
-#endif	
 }
 
 void stop_song(void)  // FKA Player.selectSong(0)
 {
 	if (audio_disabled)
 		return;
-#if 1
-//	SDL_LockAudioDevice(audioDevice);
 
 	music_stopped = true;
-
-//	SDL_UnlockAudioDevice(audioDevice);
-#endif
 }
 
 void fade_song(void)  // FKA Player.selectSong($C001)
 {
 	if (audio_disabled)
 		return;
-#if 1
-//	SDL_LockAudioDevice(audioDevice);
 
 	lds_fade(1);
-
-//	SDL_UnlockAudioDevice(audioDevice);
-#endif
 }
 
 void set_volume(Uint8 musicVolume_, Uint8 sampleVolume_)  // FKA NortSong.setVol and Player.setVol
 {
 	if (audio_disabled)
 		return;
-#if 1
-//	SDL_LockAudioDevice(audioDevice);
 
 	musicVolume = musicVolume_;
 	sampleVolume = sampleVolume_;
-
-//	SDL_UnlockAudioDevice(audioDevice);
-#endif
 }
 
 void multiSamplePlay(const Sint16 *samples, size_t sampleCount, Uint8 chan, Uint8 vol)  // FKA Player.multiSamplePlay
@@ -409,12 +324,8 @@ void multiSamplePlay(const Sint16 *samples, size_t sampleCount, Uint8 chan, Uint
 	if (audio_disabled || samples_disabled)
 		return;
 
-//	SDL_LockAudioDevice(audioDevice);
-
 	channelSamples[chan] = samples;
 	channelSampleCount[chan] = sampleCount;
 	channelVolume[chan] = vol;
-
-//	SDL_UnlockAudioDevice(audioDevice);
 }
 

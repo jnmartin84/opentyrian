@@ -27,6 +27,8 @@
  * \brief Text drawing routines.
  */
 
+void draw_font_dark(uint8_t *surface, int x, int y, const char *text, Font font, FontAlignment alignment, bool black);
+
 /**
  * \brief Draws text in a color specified by hue and value and with a drop
  *        shadow.

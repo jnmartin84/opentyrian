@@ -310,8 +310,7 @@ bool episodeSelect(void)
 		bool mouseMoved = false;
 		do
 		{
-// FIXME
-//			SDL_Delay(16);
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -329,49 +328,6 @@ bool episodeSelect(void)
 		bool action = false;
 		bool cancel = false;
 
-// FIXME
-#if 0
-		if (mouseMoved || newmouse)
-		{
-			// Find menu item that was hovered or clicked.
-			for (size_t i = 0; i < menuItemsCount; ++i)
-			{
-				if (mouse_x >= xMenuItem && mouse_x < xMenuItem + wMenuItem[i])
-				{
-					const int yMenuItem = yMenuItems + dyMenuItems * i;
-					if (mouse_y >= yMenuItem && mouse_y < yMenuItem + hMenuItem)
-					{
-						if (selectedIndex != i)
-						{
-							JE_playSampleNum(S_CURSOR);
-
-							selectedIndex = i;
-						}
-
-						if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
-						    lastmouse_x >= xMenuItem && lastmouse_x < xMenuItem + wMenuItem[i] &&
-						    lastmouse_y >= yMenuItem && lastmouse_y < yMenuItem + hMenuItem)
-						{
-							action = true;
-						}
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (newmouse)
-		{
-			if (lastmouse_but == SDL_BUTTON_RIGHT)
-			{
-				JE_playSampleNum(S_SPRING);
-
-				cancel = true;
-			}
-		}
-		else 
-#endif		
 		if (newkey)
 		{
 			switch (lastkey_scan)
@@ -503,8 +459,7 @@ bool difficultySelect(void)
 		bool mouseMoved = false;
 		do
 		{
-// FIXME
-//			SDL_Delay(16);
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -563,50 +518,7 @@ bool difficultySelect(void)
 #endif
 		bool action = false;
 		bool cancel = false;
-// FIXME
-#if 0
-		if (mouseMoved || newmouse)
-		{
-			// Find menu item that was hovered or clicked.
-			for (size_t i = 0; i < menuItemsVisibleCount; ++i)
-			{
-				const int xMenuItem = xCenter - wMenuItem[i] / 2;
-				if (mouse_x >= xMenuItem && mouse_x < xMenuItem + wMenuItem[i])
-				{
-					const int yMenuItem = yMenuItems + dyMenuItems * i;
-					if (mouse_y >= yMenuItem && mouse_y < yMenuItem + hMenuItem)
-					{
-						if (selectedIndex != i)
-						{
-							JE_playSampleNum(S_CURSOR);
 
-							selectedIndex = i;
-						}
-
-						if (newmouse && lastmouse_but == SDL_BUTTON_LEFT &&
-						    lastmouse_x >= xMenuItem && lastmouse_x < xMenuItem + wMenuItem[i] &&
-						    lastmouse_y >= yMenuItem && lastmouse_y < yMenuItem + hMenuItem)
-						{
-							action = true;
-						}
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (newmouse)
-		{
-			if (lastmouse_but == SDL_BUTTON_RIGHT)
-			{
-				JE_playSampleNum(S_SPRING);
-
-				cancel = true;
-			}
-		}
-		else 
-#endif		
 		if (newkey)
 		{
 			switch (lastkey_scan)

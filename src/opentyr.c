@@ -327,8 +327,7 @@ void setupMenu(void)
 		int oldFullscreenDisplay = fullscreen_display;
 		do
 		{
-			// fixme
-//			SDL_Delay(16);
+			n64_Delay(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;

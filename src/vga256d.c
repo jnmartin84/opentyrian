@@ -85,9 +85,9 @@ void JE_rectangle(uint8_t *surface, int a, int b, int c, int d, int e) /* x1, y1
 
 void fill_rectangle_xy(uint8_t *surface, int x, int y, int x2, int y2, Uint8 color)
 {
-	// FIXME
-//	SDL_Rect rect = { x, y, x2 - x + 1, y2 - y + 1 };
-//	SDL_FillRect(surface, &rect, color);
+	for(int ny=y; ny<y2;ny++) {
+		memset(surface + (ny*screenpitch) + x, color, x2 - x);
+	}
 }
 
 void JE_barShade(uint8_t *surface, int a, int b, int c, int d) /* x1, y1, x2, y2 */

@@ -347,21 +347,25 @@ void unlockVideo(display_context_t dc)
     }
 }
 extern Uint32 rgb_palette[256];
+extern Uint32 tworgb_palette[65536];
 void JE_showVGA(void) 
 { 
+		// this is about as fast as it gets without rewriting all of the OpenTyrian blitting code instead
         _dc = lockVideo(1);
-	// FIXME
-//	scale_and_flip(VGAScreen);
-//for(int y=0;y<20;y++) {
-//	graphics_draw_line(_dc,0,y,319,y+1,0);
-//}
-for(int y=0;y<200;y++) {
-for(int x=0;x<320;x++) {
-graphics_draw_pixel(_dc,x,20+y,rgb_palette[VGAScreen[(y*screenpitch)+x]]);
-}
+		// 20*screenpitch to get it centered, * sizeof(pixel)
+		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+		uint16_t *src16 = (uint16_t *)VGAScreen;
 
-}
-unlockVideo(_dc);
+		for (uint n=0;n<32000;n++)//=4)
+		{
+			// read 2 8-bit pixels at a time from VGAScreen 
+			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
+			*dst32++ = tworgb_palette[*src16++];
+//			*dst32++ = tworgb_palette[*src16++];
+//			*dst32++ = tworgb_palette[*src16++];
+//			*dst32++ = tworgb_palette[*src16++];
+		}
+		unlockVideo(_dc);
 }
 
 #if 0

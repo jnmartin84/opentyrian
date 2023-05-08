@@ -13,7 +13,7 @@ HEADERNAME = header
 LIBS = -ldragon -lc -lm -ldragonsys -lc
 LINK_FLAGS = -G4 -L$(ROOTDIR)/lib -L$(ROOTDIR)/mips64-elf/lib $(LIBS) -Tn64.ld
 PROG_NAME = opentyrian
-CFLAGS = -std=gnu99 -march=vr4300 -mtune=vr4300 -Wall -G4 -O3 -I$(ROOTDIR)/include -I$(ROOTDIR)/mips64-elf/include
+CFLAGS = -mno-shared -mno-abicalls -mno-branch-likely -mno-llsc -mno-check-zero-division -std=gnu99 -mabi=o64 -std=gnu99 -march=vr4300 -mtune=vr4300 -Wall -G4 -O3 -I$(ROOTDIR)/include -I$(ROOTDIR)/mips64-elf/include
 #-fno-strict-aliasing 
 
 
