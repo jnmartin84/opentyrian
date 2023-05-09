@@ -946,10 +946,11 @@ void update_input_queue(void) {
 	}
 }	
 
+static void the_audio_callback(int o);
 
-static volatile uint64_t timekeeping = 0;
+static volatile uint32_t timekeeping = 0;
 bool n64_ai_started = false;
-void tickercb(int o) {
+static void tickercb(int o) {
 	if ((timekeeping & 7) == 0)
 	{
 		the_audio_callback(o);
@@ -963,14 +964,13 @@ void tickercb(int o) {
 
 uint32_t n64_GetTicks() {
 	// 1 tick == 1 ms
-	return (uint32_t)(timekeeping&0xFFFFFFFF);
+	return timekeeping;
 }
 
 __attribute__ ((optimize(0))) void n64_Delay(uint32_t duration)
 {
-	const uint64_t start = timekeeping;
-	const uint64_t durationtk = duration;
-	while ( ((timekeeping) - start) < durationtk ) {
+	const uint32_t start = n64_GetTicks();
+	while ( ((n64_GetTicks()) - start) < duration ) {
 		continue;
 	}
 }
@@ -981,7 +981,7 @@ static int16_t __attribute__((aligned(8))) pcmout[2][NUM_SAMPLES*STEREO_MUL] = {
 int pcmflip = 0;
 int16_t* pcmbuf;
 extern void audioCallback(void *userdata, Uint8 *stream, int size);
-void the_audio_callback(int o) {
+static void the_audio_callback(int o) {
 	if (!n64_ai_started)
 	{
 		return;
@@ -994,7 +994,7 @@ void the_audio_callback(int o) {
 		AI_regs->length = NUM_BYTES_IN_SAMPLE_BUFFER;
 		AI_regs->control = 1;
 		pcmflip ^= 1;
-		pcmbuf = (uint16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
+		pcmbuf = (int16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
 	};
 }
 
@@ -1002,7 +1002,7 @@ void the_audio_callback(int o) {
 void n64_startAudio(void)
 {
 	audio_init(SOUND_SAMPLE_RATE, 0);
-	pcmbuf = (uint16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
+	pcmbuf = (int16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
 	n64_ai_started = true;
 }
 

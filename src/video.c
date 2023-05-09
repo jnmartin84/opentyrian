@@ -353,22 +353,35 @@ void JE_showVGA(void)
 		// this is about as fast as it gets without rewriting all of the OpenTyrian blitting code instead
 		_dc = lockVideo(1);
 		// 20*screenpitch to get it centered, * sizeof(pixel)
-		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
-		uint32_t *src32 = (uint32_t *)VGAScreen;
+//		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+//		uint32_t *src32 = (uint32_t *)VGAScreen;
 
-#if 0
-		for (uint n=0;n<16000;n++)
+#if 1
+		uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+		uint32_t *src32 = (uint32_t *)VGAScreen;
+		for (uint n=0;n<4000;n++)
 		{
-			// read 4 8-bit pixels at a time from VGAScreen 
-			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
-			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
-			uint32_t src_four = *src32++;
-			uint32_t src12 = tworgb_palette[(src_four >> 16)];
-			uint32_t src34 = tworgb_palette[(src_four & 0xffff)];
-			*dst32++ = src12;
-			*dst32++ = src34;
+			uint32_t src_four1 = *src32++;
+			uint32_t src_four2 = *src32++;
+			uint32_t src_four3 = *src32++;
+			uint32_t src_four4 = *src32++;
+			uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
+			uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
+			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+			src12 = tworgb_palette[(src_four2 >> 16)];
+			src34 = tworgb_palette[(src_four2 & 0xffff)];
+			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+			src12 = tworgb_palette[(src_four3 >> 16)];
+			src34 = tworgb_palette[(src_four3 & 0xffff)];
+			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+			src12 = tworgb_palette[(src_four4 >> 16)];
+			src34 = tworgb_palette[(src_four4 & 0xffff)];
+			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
 		}
 #endif
+#if 0
+		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+		uint32_t *src32 = (uint32_t *)VGAScreen;
 		for (uint n=0;n<4000;n++)
 		{
 			// read 4 8-bit pixels at a time from VGAScreen 
@@ -396,6 +409,7 @@ void JE_showVGA(void)
 			*dst32++ = src12;
 			*dst32++ = src34;			
 		}
+#endif
 		unlockVideo(_dc);
 }
 
