@@ -950,14 +950,11 @@ void update_input_queue(void) {
 static volatile uint64_t timekeeping = 0;
 bool n64_ai_started = false;
 void tickercb(int o) {
-	if ((timekeeping & 15) == 0)
+	if ((timekeeping & 7) == 0)
 	{
-		if (n64_ai_started)
-		{
-			the_audio_callback(o);
-		}
+		the_audio_callback(o);
 	}
- 	if ((timekeeping & 63) == 0)
+ 	if ((timekeeping & 32) == 0)
 	{
 		update_input_queue();
 	}
@@ -985,6 +982,10 @@ int pcmflip = 0;
 int16_t* pcmbuf;
 extern void audioCallback(void *userdata, Uint8 *stream, int size);
 void the_audio_callback(int o) {
+	if (!n64_ai_started)
+	{
+		return;
+	}
 	if(!(AI_regs->status & AI_STATUS_FULL)) {
 
 		audioCallback(NULL, (Uint8*)pcmbuf, NUM_BYTES_IN_SAMPLE_BUFFER/2);
@@ -1003,15 +1004,6 @@ void n64_startAudio(void)
 	audio_init(SOUND_SAMPLE_RATE, 0);
 	pcmbuf = (uint16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
 	n64_ai_started = true;
-#if 0
-	/* timer_link_t* audio_timer = */
-	new_timer(
-		// often enough to stop clicks
-		// might need more tweaking
-		TIMER_TICKS(15000),
-		TF_CONTINUOUS,
-		the_audio_callback);
-#endif
 }
 
 int main(int argc, char *argv[])
@@ -1025,10 +1017,6 @@ int main(int argc, char *argv[])
     }
     controller_init();
 
-    // center joystick...
-    controller_scan();
-//    struct controller_data keys_pressed = get_keys_down();
-//    struct SI_condat pressed = keys_pressed.c[0];
 	timer_init();
 	timekeeping = 0;
 	/* timer_link_t* tick_timer = */
@@ -1049,28 +1037,16 @@ int main(int argc, char *argv[])
 	printf("This is free software, and you are welcome to redistribute it\n");
 	printf("under certain conditions.  See the file COPYING for details.\n\n");
 
-#if 0
-	if (SDL_Init(0))
-	{
-		printf("Failed to initialize SDL: %s\n", SDL_GetError());
-		return -1;
-	}
-#endif
 	JE_loadConfiguration();
 
 	xmas = false;//xmas_time();  // arg handler may override
 
 //	JE_paramCheck(argc, argv);
-//printf("...\n");
 	JE_scanForEpisodes();
-//printf("...\n");
 
 	init_video();
-//printf("...\n");
 	init_keyboard();
-//printf("...\n");
 	init_joysticks();
-//printf("...\n");
 //	printf("assuming mouse detected\n"); // SDL can't tell us if there isn't one
 #if 0
 	if (xmas && (!dir_file_exists(data_dir(), "tyrianc.shp") || !dir_file_exists(data_dir(), "voicesc.snd")))
@@ -1081,7 +1057,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 	JE_loadPals();
-//printf("JE_loadPals\n");
 
 	JE_loadMainShapeTables(xmas ? "tyrianc.shp" : "tyrian.shp");
 
@@ -1097,7 +1072,7 @@ int main(int argc, char *argv[])
 	youAreCheating = false;
 	smoothScroll = true;
 	loadDestruct = false;
-reset_input_queue();
+	reset_input_queue();
 #if 1
 	if (!audio_disabled)
 	{
@@ -1146,7 +1121,7 @@ reset_input_queue();
 		JE_initPlayerData();
 		JE_sortHighScores();
 
-		play_demo = false;//true;
+		play_demo = false;
 		stopped_demo = false;
 
 		gameLoaded = false;
