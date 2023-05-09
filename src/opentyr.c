@@ -948,10 +948,18 @@ void update_input_queue(void) {
 
 
 static volatile uint64_t timekeeping = 0;
-
+bool n64_ai_started = false;
 void tickercb(int o) {
-	if((timekeeping % 34) == 0) {
-	update_input_queue();
+	if ((timekeeping & 15) == 0)
+	{
+		if (n64_ai_started)
+		{
+			the_audio_callback(o);
+		}
+	}
+ 	if ((timekeeping & 63) == 0)
+	{
+		update_input_queue();
 	}
 	timekeeping+=1;
 }
@@ -985,7 +993,7 @@ void the_audio_callback(int o) {
 		AI_regs->length = NUM_BYTES_IN_SAMPLE_BUFFER;
 		AI_regs->control = 1;
 		pcmflip ^= 1;
-		pcmbuf = pcmout[pcmflip];
+		pcmbuf = (uint16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
 	};
 }
 
@@ -993,15 +1001,17 @@ void the_audio_callback(int o) {
 void n64_startAudio(void)
 {
 	audio_init(SOUND_SAMPLE_RATE, 0);
-	pcmbuf = pcmout[pcmflip];
-
+	pcmbuf = (uint16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
+	n64_ai_started = true;
+#if 0
 	/* timer_link_t* audio_timer = */
 	new_timer(
 		// often enough to stop clicks
 		// might need more tweaking
-		TIMER_TICKS(7500),
+		TIMER_TICKS(15000),
 		TF_CONTINUOUS,
 		the_audio_callback);
+#endif
 }
 
 int main(int argc, char *argv[])

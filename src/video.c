@@ -263,7 +263,7 @@ bool init_scaler(unsigned int new_scaler)
 {
 	#if 0
 	int w = scalers[new_scaler].width,
-	    h = scalers[new_scaler].height;
+	h = scalers[new_scaler].height;
 	int bpp = main_window_tex_format->BitsPerPixel; // TODOSDL2
 
 	scaler = new_scaler;
@@ -325,47 +325,76 @@ display_context_t _dc;
 
 display_context_t lockVideo(int wait)
 {
-    display_context_t dc;
+	display_context_t dc;
 
-    if (wait)
-    {
-        while (!(dc = display_lock()));
-    }
-    else
-    {
-        dc = display_lock();
-    }
+	if (wait)
+	{
+		while (!(dc = display_lock()));
+	}
+	else
+	{
+		dc = display_lock();
+	}
 
-    return dc;
+	return dc;
 }
 
 void unlockVideo(display_context_t dc)
 {
-    if (dc)
-    {
-        display_show(dc);
-    }
+	if (dc)
+	{
+		display_show(dc);
+	}
 }
 extern Uint32 rgb_palette[256];
 extern Uint32 tworgb_palette[65536];
 void JE_showVGA(void) 
 { 
 		// this is about as fast as it gets without rewriting all of the OpenTyrian blitting code instead
-        _dc = lockVideo(1);
+		_dc = lockVideo(1);
 		// 20*screenpitch to get it centered, * sizeof(pixel)
 		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
 		uint32_t *src32 = (uint32_t *)VGAScreen;
 
+#if 0
 		for (uint n=0;n<16000;n++)
 		{
 			// read 4 8-bit pixels at a time from VGAScreen 
 			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
 			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
-			uint32_t src_two = *src32++;
-			uint16_t src1 = (src_two >> 16);
-			uint16_t src2 = (src_two & 0xffff);
-			*dst32++ = tworgb_palette[src1];
-			*dst32++ = tworgb_palette[src2];
+			uint32_t src_four = *src32++;
+			uint32_t src12 = tworgb_palette[(src_four >> 16)];
+			uint32_t src34 = tworgb_palette[(src_four & 0xffff)];
+			*dst32++ = src12;
+			*dst32++ = src34;
+		}
+#endif
+		for (uint n=0;n<4000;n++)
+		{
+			// read 4 8-bit pixels at a time from VGAScreen 
+			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
+			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
+			// unrolled 4x
+			uint32_t src_four1 = *src32++;
+			uint32_t src_four2 = *src32++;
+			uint32_t src_four3 = *src32++;
+			uint32_t src_four4 = *src32++;
+			uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
+			uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
+			*dst32++ = src12;
+			*dst32++ = src34;
+			src12 = tworgb_palette[(src_four2 >> 16)];
+			src34 = tworgb_palette[(src_four2 & 0xffff)];
+			*dst32++ = src12;
+			*dst32++ = src34;
+			src12 = tworgb_palette[(src_four3 >> 16)];
+			src34 = tworgb_palette[(src_four3 & 0xffff)];
+			*dst32++ = src12;
+			*dst32++ = src34;
+			src12 = tworgb_palette[(src_four4 >> 16)];
+			src34 = tworgb_palette[(src_four4 & 0xffff)];
+			*dst32++ = src12;
+			*dst32++ = src34;			
 		}
 		unlockVideo(_dc);
 }
