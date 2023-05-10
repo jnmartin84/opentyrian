@@ -53,11 +53,11 @@ uint8_t *game_screen;
 
 static void init_renderer(void);
 static void deinit_renderer(void);
-static void init_texture(void);
+//static void init_texture(void);
 static void deinit_texture(void);
 
-static int window_get_display_index(void);
-static void window_center_in_display(int display_index);
+//static int window_get_display_index(void);
+//static void window_center_in_display(int display_index);
 //static void calc_dst_render_rect(uint8_t *src_surface, SDL_Rect *dst_rect);
 //static void scale_and_flip(SDL_Surface *);
 extern void *__safe_buffer[];
@@ -139,9 +139,9 @@ static void deinit_renderer(void)
 	#endif
 }
 
+#if 0
 static void init_texture(void)
 {
-	#if 0
 	assert(main_window_renderer != NULL);
 
 	int bpp = 32; // TODOSDL2
@@ -158,8 +158,8 @@ static void init_texture(void)
 		fprintf(stderr, "error: failed to create scaler texture %dx%dx%s: %s\n", scaler_w, scaler_h, SDL_GetPixelFormatName(format), SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
-	#endif
 }
+#endif
 
 static void deinit_texture(void)
 {
@@ -177,15 +177,15 @@ static void deinit_texture(void)
 	}
 	#endif
 }
-
+#if 0
 static int window_get_display_index(void)
 {
 return 0;//	return SDL_GetWindowDisplayIndex(main_window);
 }
-
+#endif
+#if 0
 static void window_center_in_display(int display_index)
 {
-	#if 0
 	int win_w, win_h;
 	SDL_GetWindowSize(main_window, &win_w, &win_h);
 
@@ -193,8 +193,8 @@ static void window_center_in_display(int display_index)
 	SDL_GetDisplayBounds(display_index, &bounds);
 
 	SDL_SetWindowPosition(main_window, bounds.x + (bounds.w - win_w) / 2, bounds.y + (bounds.h - win_h) / 2);
-#endif
 }
+#endif
 
 void reinit_fullscreen(int new_display)
 {
@@ -346,71 +346,91 @@ void unlockVideo(display_context_t dc)
 		display_show(dc);
 	}
 }
+#define USE_64BIT_WRITES 1
 extern Uint32 rgb_palette[256];
 extern Uint32 tworgb_palette[65536];
 void JE_showVGA(void) 
 { 
-		// this is about as fast as it gets without rewriting all of the OpenTyrian blitting code instead
-		_dc = lockVideo(1);
-		// 20*screenpitch to get it centered, * sizeof(pixel)
-//		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
-//		uint32_t *src32 = (uint32_t *)VGAScreen;
+	_dc = lockVideo(1);
 
-#if 1
-		uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
-		uint32_t *src32 = (uint32_t *)VGAScreen;
-		for (uint n=0;n<4000;n++)
-		{
-			uint32_t src_four1 = *src32++;
-			uint32_t src_four2 = *src32++;
-			uint32_t src_four3 = *src32++;
-			uint32_t src_four4 = *src32++;
-			uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
-			uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
-			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
-			src12 = tworgb_palette[(src_four2 >> 16)];
-			src34 = tworgb_palette[(src_four2 & 0xffff)];
-			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
-			src12 = tworgb_palette[(src_four3 >> 16)];
-			src34 = tworgb_palette[(src_four3 & 0xffff)];
-			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
-			src12 = tworgb_palette[(src_four4 >> 16)];
-			src34 = tworgb_palette[(src_four4 & 0xffff)];
-			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
-		}
+#if USE_64BIT_WRITES
+	// Nintendo 64 frame buffer, 64-bit pointer to 20th row
+	uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+	// OpenTyrian frame buffer, 32-bit pointer to 1st row
+	uint32_t *src32 = (uint32_t *)VGAScreen;
+
+	// 64000 8-bit pixels
+	// / 
+	// 16 pixels per loop
+	// = 
+	// 4000 iterations
+	for (uint n=0;n<4000;n++)
+	{
+		// read 4 pixels from 8-bit frame buffer
+		uint32_t src_four1 = *src32++;
+		// read 4 more pixels from 8-bit frame buffer
+		uint32_t src_four2 = *src32++;
+		// read 4 more pixels from 8-bit frame buffer
+		uint32_t src_four3 = *src32++;
+		// read 4 more pixels from 8-bit frame buffer
+		uint32_t src_four4 = *src32++;
+		// color index first two pixels to get 2 16-bit pixels
+		uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
+		// color index second two pixels to get 2 more 16-bit pixels
+		uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
+		// write 4 16-bit pixels to 16-bit frame buffer
+		*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+		// color index two more pixels to get 2 16-bit pixels
+		src12 = tworgb_palette[(src_four2 >> 16)];
+		// color index two more pixels to get 2 16-bit pixels
+		src34 = tworgb_palette[(src_four2 & 0xffff)];
+		// write 4 more 16-bit pixels to 16-bit frame buffer
+		*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+		// color index two more pixels to get 2 16-bit pixels
+		src12 = tworgb_palette[(src_four3 >> 16)];
+		// color index two more pixels to get 2 16-bit pixels
+		src34 = tworgb_palette[(src_four3 & 0xffff)];
+		// write 4 more 16-bit pixels to 16-bit frame buffer
+		*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+		// color index two more pixels to get 2 16-bit pixels
+		src12 = tworgb_palette[(src_four4 >> 16)];
+		// color index two more pixels to get 2 16-bit pixels
+		src34 = tworgb_palette[(src_four4 & 0xffff)];
+		// write 4 more 16-bit pixels to 16-bit frame buffer
+		*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+	}
+#else
+	uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+	uint32_t *src32 = (uint32_t *)VGAScreen;
+	for (uint n=0;n<4000;n++)
+	{
+		// read 4 8-bit pixels at a time from VGAScreen 
+		// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
+		// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
+		// unrolled 4x
+		uint32_t src_four1 = *src32++;
+		uint32_t src_four2 = *src32++;
+		uint32_t src_four3 = *src32++;
+		uint32_t src_four4 = *src32++;
+		uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
+		uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
+		*dst32++ = src12;
+		*dst32++ = src34;
+		src12 = tworgb_palette[(src_four2 >> 16)];
+		src34 = tworgb_palette[(src_four2 & 0xffff)];
+		*dst32++ = src12;
+		*dst32++ = src34;
+		src12 = tworgb_palette[(src_four3 >> 16)];
+		src34 = tworgb_palette[(src_four3 & 0xffff)];
+		*dst32++ = src12;
+		*dst32++ = src34;
+		src12 = tworgb_palette[(src_four4 >> 16)];
+		src34 = tworgb_palette[(src_four4 & 0xffff)];
+		*dst32++ = src12;
+		*dst32++ = src34;			
+	}
 #endif
-#if 0
-		uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
-		uint32_t *src32 = (uint32_t *)VGAScreen;
-		for (uint n=0;n<4000;n++)
-		{
-			// read 4 8-bit pixels at a time from VGAScreen 
-			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
-			// write 2 16-bit pixels at a time to Nintendo 64 frame buffer
-			// unrolled 4x
-			uint32_t src_four1 = *src32++;
-			uint32_t src_four2 = *src32++;
-			uint32_t src_four3 = *src32++;
-			uint32_t src_four4 = *src32++;
-			uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
-			uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
-			*dst32++ = src12;
-			*dst32++ = src34;
-			src12 = tworgb_palette[(src_four2 >> 16)];
-			src34 = tworgb_palette[(src_four2 & 0xffff)];
-			*dst32++ = src12;
-			*dst32++ = src34;
-			src12 = tworgb_palette[(src_four3 >> 16)];
-			src34 = tworgb_palette[(src_four3 & 0xffff)];
-			*dst32++ = src12;
-			*dst32++ = src34;
-			src12 = tworgb_palette[(src_four4 >> 16)];
-			src34 = tworgb_palette[(src_four4 & 0xffff)];
-			*dst32++ = src12;
-			*dst32++ = src34;			
-		}
-#endif
-		unlockVideo(_dc);
+	unlockVideo(_dc);
 }
 
 #if 0
