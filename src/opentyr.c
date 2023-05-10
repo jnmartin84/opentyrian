@@ -58,7 +58,7 @@
 const char *opentyrian_str = "OpenTyrian";
 const char *opentyrian_version = OPENTYRIAN_VERSION;
 
-
+#if 0
 static size_t getDisplayPickerItemsCount(void)
 {
 	return 1;// + (size_t)SDL_GetNumVideoDisplays();
@@ -96,6 +96,7 @@ static const char *getScalingModePickerItem(size_t i, char *buffer, size_t buffe
 
 	return scaling_mode_names[i];
 }
+#endif
 
 void setupMenu(void)
 {
@@ -799,147 +800,185 @@ void update_input_queue(void) {
 	struct SI_condat pressed = keys_pressed.c[0];
 	struct SI_condat released = keys_released.c[0];
 
-	if (iq_len > 1023) {
+	if (iq_len > 1023)
+	{
 		return;
 	}
 
-	if (pressed.A) {
+	if (pressed.A)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_a;
 		iq_len++;
 	}
-	if (pressed.B) {
+	else if (released.A)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_a;
+		iq_len++;
+	}
+
+	if (pressed.B)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_b;
 		iq_len++;
 	}
-	if (pressed.Z) {
+	else if (released.B)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_b;
+		iq_len++;
+	}
+
+	if (pressed.Z)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_z;
 		iq_len++;
 	}
-	if (pressed.L) {
+	if (released.Z)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_z;
+		iq_len++;
+	}
+
+	if (pressed.L)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_l;
 		iq_len++;
 	}
-	if (pressed.R	) {
+	else if (released.L)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_l;
+		iq_len++;
+	}
+
+	if (pressed.R)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_r;
 		iq_len++;
 	}
-	if (pressed.up) {
+	else if (released.R)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_r;
+		iq_len++;
+	}
+
+	if (pressed.up)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_up;
 		iq_len++;
 	}
-	if (pressed.down) {
+	else if (released.up)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_up;
+		iq_len++;
+	}
+
+	if (pressed.down)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_down;
 		iq_len++;
 	}
-	if (pressed.left) {
+	else if (released.down)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_down;
+		iq_len++;
+	}
+
+	if (pressed.left)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_left;
 		iq_len++;
 	}
-	if (pressed.right) {
+	else if (released.left)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_left;
+		iq_len++;
+	}
+
+	if (pressed.right)
+	{
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_right;
 		iq_len++;
 	}
+	else if (released.right)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_right;
+		iq_len++;
+	}
+
 	if (pressed.start) {
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_start;
 		iq_len++;
 	}
+	else if (released.start)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_start;
+		iq_len++;
+	}
+
 	if (pressed.C_up) {
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_c_up;
 		iq_len++;
 	}
+	else if (released.C_up)
+	{
+		input_queue[iq_len].down = 0;
+		input_queue[iq_len].key = ctrlr_c_up;
+		iq_len++;
+	}
+
 	if (pressed.C_down) {
 		input_queue[iq_len].down = 1;
 		input_queue[iq_len].key = ctrlr_c_down;
 		iq_len++;
 	}
-	if (pressed.C_left) {
-		input_queue[iq_len].down = 1;
-		input_queue[iq_len].key = ctrlr_c_left;
-		iq_len++;
-	}
-	if (pressed.C_right) {
-		input_queue[iq_len].down = 1;
-		input_queue[iq_len].key = ctrlr_c_right;
-		iq_len++;
-	}
-	
-	if (released.A) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_a;
-		iq_len++;
-	}
-	if (released.B) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_b;
-		iq_len++;
-	}
-	if (released.Z) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_z;
-		iq_len++;
-	}
-	if (released.L) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_l;
-		iq_len++;
-	}
-	if (released.R	) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_r;
-		iq_len++;
-	}
-	if (released.up) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_up;
-		iq_len++;
-	}
-	if (released.down) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_down;
-		iq_len++;
-	}
-	if (released.left) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_left;
-		iq_len++;
-	}
-	if (released.right) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_right;
-		iq_len++;
-	}
-	if (released.start) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_start;
-		iq_len++;
-	}
-	if (released.C_up) {
-		input_queue[iq_len].down = 0;
-		input_queue[iq_len].key = ctrlr_c_up;
-		iq_len++;
-	}
-	if (released.C_down) {
+	else if (released.C_down)
+	{
 		input_queue[iq_len].down = 0;
 		input_queue[iq_len].key = ctrlr_c_down;
 		iq_len++;
 	}
-	if (released.C_left) {
+
+	if (pressed.C_left)
+	{
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_c_left;
+		iq_len++;
+	}
+	else if (released.C_left)
+	{
 		input_queue[iq_len].down = 0;
 		input_queue[iq_len].key = ctrlr_c_left;
 		iq_len++;
 	}
-	if (released.C_right) {
+
+	if (pressed.C_right)
+	{
+		input_queue[iq_len].down = 1;
+		input_queue[iq_len].key = ctrlr_c_right;
+		iq_len++;
+	}
+	else if (released.C_right)
+	{
 		input_queue[iq_len].down = 0;
 		input_queue[iq_len].key = ctrlr_c_right;
 		iq_len++;
@@ -987,6 +1026,7 @@ static void the_audio_callback(int o) {
 		return;
 	}
 	if(!(AI_regs->status & AI_STATUS_FULL)) {
+		disable_interrupts();
 
 		audioCallback(NULL, (Uint8*)pcmbuf, NUM_BYTES_IN_SAMPLE_BUFFER/2);
 
@@ -995,6 +1035,8 @@ static void the_audio_callback(int o) {
 		AI_regs->control = 1;
 		pcmflip ^= 1;
 		pcmbuf = (int16_t *)((uintptr_t)pcmout[pcmflip] |  (uintptr_t)0xA0000000);
+
+		enable_interrupts();
 	};
 }
 
