@@ -828,8 +828,8 @@ void JE_loadConfiguration(void)
 		tyrMusicVolume = 191;
 		fxVolume = 191;
 		gammaCorrection = 0;
-		processorType = 2;//3;//4
-		gameSpeed = 4;
+		processorType = 1;//3;//4
+		gameSpeed = 3;
 	}
 	
 	load_opentyrian_config();
