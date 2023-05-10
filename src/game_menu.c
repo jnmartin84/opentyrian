@@ -867,7 +867,7 @@ void JE_itemScreen(void)
 					if (temp2 == 0)
 						yChg = 0;
 
-					JE_mouseStart();
+					//JE_mouseStart();
 
 					JE_showVGA();
 
@@ -876,7 +876,7 @@ void JE_itemScreen(void)
 						fade_palette(colors, 10, 0, 255);
 						backFromHelp = false;
 					}
-					JE_mouseReplace();
+					//JE_mouseReplace();
 
 					setDelay(1);
 				}
@@ -920,7 +920,7 @@ void JE_itemScreen(void)
 							newPal = 0;
 						}
 
-						JE_mouseStart();
+						//JE_mouseStart();
 
 						if (paletteChanged)
 						{
@@ -936,7 +936,7 @@ void JE_itemScreen(void)
 							backFromHelp = false;
 						}
 
-						JE_mouseReplace();
+						//JE_mouseReplace();
 
 					}
 					else  /* current menu is anything but weapon sim or datacube */
@@ -952,7 +952,7 @@ void JE_itemScreen(void)
 							newPal = 0;
 						}
 
-						JE_mouseStart();
+						//JE_mouseStart();
 
 						if (paletteChanged)
 						{
@@ -962,7 +962,7 @@ void JE_itemScreen(void)
 
 						JE_showVGA(); /* SYN: This is the where the screen updates for most menus */
 
-						JE_mouseReplace();
+						//JE_mouseReplace();
 
 						if (backFromHelp)
 						{
@@ -2531,7 +2531,7 @@ void JE_drawScore(void)
 	char cl[24];
 	if (curMenu == MENU_UPGRADE_SUB)
 	{
-		sprintf(cl, "%d", JE_cashLeft());
+		sprintf(cl, "%ld", JE_cashLeft());
 		JE_textShade(VGAScreen, 65, 173, cl, 1, 6, DARKEN);
 	}
 }

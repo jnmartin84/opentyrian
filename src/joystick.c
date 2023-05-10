@@ -45,7 +45,7 @@ bool ignore_joystick = false;
 int joysticks = 0;
 Joystick *joystick = NULL;
 
-static const int joystick_analog_max = 32767;
+//static const int joystick_analog_max = 32767;
 
 // eliminates axis movement below the threshold
 int joystick_axis_threshold(int j, int value)
@@ -368,7 +368,7 @@ void reset_joystick_assignments(int j)
 	joystick[j].threshold = 5;
 #endif	
 }
-
+#if 0
 static const char* const assignment_names[] =
 {
 	"up",
@@ -382,7 +382,7 @@ static const char* const assignment_names[] =
 	"menu",
 	"pause",
 };
-
+#endif
 bool load_joystick_assignments(Config *config, int j)
 {
 return false;

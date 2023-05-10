@@ -261,8 +261,8 @@ bool episodeSelect(void)
 	const int xMenuItem = 20;
 	const int yMenuItems = 50;
 	const int dyMenuItems = 30;
-	const int hMenuItem = 13;
-	int wMenuItem[EPISODE_AVAILABLE] = { 0 };
+//	const int hMenuItem = 13;
+//	int wMenuItem[EPISODE_AVAILABLE] = { 0 };
 
 	for (; ; )
 	{
@@ -283,7 +283,7 @@ bool episodeSelect(void)
 		{
 			const char *const text = episode_name[i + 1];
 
-			wMenuItem[i] = JE_textWidth(text, normal_font);
+//			wMenuItem[i] = JE_textWidth(text, normal_font);
 			const int y = yMenuItems + dyMenuItems * i;
 
 			const bool selected = i == selectedIndex;
@@ -410,7 +410,7 @@ bool difficultySelect(void)
 	const int yMenuHeader = 20;
 	const int yMenuItems = 54;
 	const int dyMenuItems = 24;
-	const int hMenuItem = 13;
+//	const int hMenuItem = 13;
 	int wMenuItem[COUNTOF(difficulty_name) - 1] = { 0 };
 
 	for (; ; )

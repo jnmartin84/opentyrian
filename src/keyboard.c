@@ -49,11 +49,11 @@ Uint8 keysactive[SDL_NUM_SCANCODES];
 bool new_text;
 char last_text[128];//SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
-static bool mouseRelativeEnabled;
+//static bool mouseRelativeEnabled;
 
 // Relative mouse position in window coordinates.
-static Sint32 mouseWindowXRelative;
-static Sint32 mouseWindowYRelative;
+//static Sint32 mouseWindowXRelative;
+//static Sint32 mouseWindowYRelative;
 
 void flush_events_buffer(void)
 {

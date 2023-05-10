@@ -2619,8 +2619,7 @@ new_game:
 
 					case 'L':
 						nextLevel = atoi(s + 9);
-						// FIXME ?
-						/*SDL_*/strlcpy(levelName, s + 13, 10);
+						strlcpy(levelName, s + 13, 10);
 						levelSong = atoi(s + 22);
 						if (nextLevel == 0)
 						{
@@ -3271,8 +3270,7 @@ bool titleScreen(void)
 		MENU_ITEM_QUIT,
 	};
 
-// FIXME ?
-	/*SDL_*/strlcpy(menuText[4], "Setup", sizeof menuText[4]);  // override "Ordering Info"
+	strlcpy(menuText[4], "Setup", sizeof menuText[4]);  // override "Ordering Info"
 
 	if (shopSpriteSheet.data == NULL)
 		JE_loadCompShapes(&shopSpriteSheet, '1');  // need mouse pointer sprites

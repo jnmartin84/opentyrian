@@ -324,8 +324,8 @@ struct destruct_world_s
 static void JE_destructMain(void);
 static void JE_introScreen(void);
 static enum de_mode_t JE_modeSelect(void);
-static void JE_helpScreen(void);
-static void JE_pauseScreen(void);
+//static void JE_helpScreen(void);
+//static void JE_pauseScreen(void);
 
 //level generating functions
 static void JE_generateTerrain(void);
@@ -1371,6 +1371,7 @@ static void JE_superPixel(unsigned int tempPosX, unsigned int tempPosY)
 	}
 }
 
+#if 0
 static void JE_helpScreen(void)
 {
 	unsigned int i, j;
@@ -1403,7 +1404,9 @@ static void JE_helpScreen(void)
 	JE_showVGA();
 	fade_palette(colors, 15, 0, 255);
 }
+#endif
 
+#if 0
 static void JE_pauseScreen(void)
 {
 	set_volume(tyrMusicVolume / 2, fxVolume);
@@ -1428,6 +1431,7 @@ static void JE_pauseScreen(void)
 
 	set_volume(tyrMusicVolume, fxVolume);
 }
+#endif
 
 /* DE_ResetX
  *

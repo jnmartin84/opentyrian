@@ -160,8 +160,7 @@ void JE_helpBox(uint8_t *screen,  int x, int y, const char *message, unsigned in
 
 		} while (!((unsigned)(pos - startpos) > boxwidth || endstring));
 
-		// FIXME
-		//SDL_strlcpy(substring, message + startpos - 1, MIN((size_t)(endpos - startpos + 1), sizeof(substring)));
+		strlcpy(substring, message + startpos - 1, MIN((size_t)(endpos - startpos + 1), sizeof(substring)));
 		JE_textShade(screen, x, y, substring, helpBoxColor, helpBoxBrightness, helpBoxShadeType);
 
 		y += verticalHeight;

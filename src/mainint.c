@@ -649,13 +649,13 @@ bool JE_loadScreen(void)
 	const int xMenuItemName = xMenuItem;
 	const int xMenuItemLastLevel = 120;
 	const int xMenuItemEpisode = 250;
-	const int wMenuItem = 300;
+//	const int wMenuItem = 300;
 	const int yMenuItems = 30;
 	const int dyMenuItems = 13;
-	const int hMenuItem = 8;
+//	const int hMenuItem = 8;
 	const int xLeftControl = 83;
 	const int xRightControl = 213;
-	const int wControl = 24;
+//	const int wControl = 24;
 	const int yControls = 179;
 
 	for (; ; )
@@ -1131,7 +1131,7 @@ void JE_highScoreScreen(void)
 	const int yEpisodeHeader = 30;
 	const int xLeftControl = 83;
 	const int xRightControl = 213;
-	const int wControl = 24;
+//	const int wControl = 24;
 	const int yControls = 179;
 
 	for (; ; )
@@ -1167,7 +1167,7 @@ void JE_highScoreScreen(void)
 			const JE_SaveFileType *const saveFile = &saveFiles[episodeIndex * 6 + i];
 			const int rank = MIN(saveFile->highScoreDiff, COUNTOF(difficultyNameB) - 1);
 
-			snprintf(buffer, sizeof buffer, "~#%d:~  %d", i + 1, saveFile->highScore1);
+			snprintf(buffer, sizeof buffer, "~#%d:~  %ld", i + 1, saveFile->highScore1);
 			JE_textShade(VGAScreen, 20, y, buffer, 15, 0, FULL_SHADE);
 			JE_textShade(VGAScreen, 110, y, saveFile->highScoreName, 15, 2, FULL_SHADE);
 			JE_textShade(VGAScreen, 250, y, difficultyNameB[rank], 15, rank + (rank == 0 ? 0 : -1), FULL_SHADE);
@@ -1184,7 +1184,7 @@ void JE_highScoreScreen(void)
 			const JE_SaveFileType *const saveFile = &saveFiles[episodeIndex * 6 + 3 + i];
 			const int rank = MIN(saveFile->highScoreDiff, COUNTOF(difficultyNameB) - 1);
 
-			snprintf(buffer, sizeof buffer, "~#%d:~  %d", i + 1, saveFile->highScore1);
+			snprintf(buffer, sizeof buffer, "~#%d:~  %ld", i + 1, saveFile->highScore1);
 			JE_textShade(VGAScreen, 20, y, buffer, 15, 0, FULL_SHADE);
 			JE_textShade(VGAScreen, 110, y, saveFile->highScoreName, 15, 2, FULL_SHADE);
 			JE_textShade(VGAScreen, 250, y, difficultyNameB[rank], 15, rank + (rank == 0 ? 0 : -1), FULL_SHADE);
@@ -1537,9 +1537,9 @@ JE_boolean JE_inGameSetup(void)
 	const int xMenuItemName = xMenuItem;
 	const int wMenuItemName = 110;
 	const int xMenuItemValue = xMenuItemName + wMenuItemName;
-	const int wMenuItemValue = 90;
-	const int wMenuItem = wMenuItemName + wMenuItemValue;
-	const int hMenuItem = 13;
+//	const int wMenuItemValue = 90;
+//	const int wMenuItem = wMenuItemName + wMenuItemValue;
+//	const int hMenuItem = 13;
 
 	for (bool done = false; !done; )
 	{
@@ -2104,7 +2104,7 @@ void JE_highScoreCheck(void)
 						JE_textShade(VGAScreen, 60, 55, miscText[53], 11, 4, FULL_SHADE);
 					}
 
-					sprintf(buffer, "%s %d", miscText[37], temp_score);
+					sprintf(buffer, "%s %ld", miscText[37], temp_score);
 					JE_textShade(VGAScreen, 70, 70, buffer, 11, 4, FULL_SHADE);
 
 					do
@@ -2211,7 +2211,7 @@ void JE_highScoreCheck(void)
 				{
 					if (i != slot)
 					{
-						sprintf(buffer, "~#%d:~  %d", (i - first_slot + 1), saveFiles[i].highScore1);
+						sprintf(buffer, "~#%d:~  %ld", (i - first_slot + 1), saveFiles[i].highScore1);
 						JE_textShade(VGAScreen,  20, ((i - first_slot + 1) * 12) + 65, buffer, 15, 0, FULL_SHADE);
 						JE_textShade(VGAScreen, 150, ((i - first_slot + 1) * 12) + 65, saveFiles[i].highScoreName, 15, 2, FULL_SHADE);
 					}
@@ -2221,7 +2221,7 @@ void JE_highScoreCheck(void)
 
 				fade_palette(colors, 15, 0, 255);
 
-				sprintf(buffer, "~#%d:~  %d", (slot - first_slot + 1), saveFiles[slot].highScore1);
+				sprintf(buffer, "~#%d:~  %ld", (slot - first_slot + 1), saveFiles[slot].highScore1);
 
 				frameCountMax = 6;
 				textGlowFont = TINY_FONT;

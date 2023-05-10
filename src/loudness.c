@@ -76,7 +76,7 @@ static Uint8 channelVolume[CHANNEL_COUNT];
 void audioCallback(void *userdata, Uint8 *stream, int size);
 
 static void load_song(unsigned int song_num);
-
+extern void n64_startAudio(void);
 bool init_audio(void)
 {
 	if (audio_disabled)

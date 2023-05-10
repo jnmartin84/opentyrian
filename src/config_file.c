@@ -909,9 +909,9 @@ bool config_parse(Config *config, int file)
 
 /* config writer */
 
+#if 0
 static void write_field(const ConfigString *field, int file)
 {
-#if 0
 	fputc('\'', file);
 	
 	char buffer[128];
@@ -984,8 +984,8 @@ static void write_field(const ConfigString *field, int file)
 		fwrite(buffer, sizeof(*buffer), o, file);
 	
 	fputc('\'', file);
-#endif	
 }
+#endif	
 
 void config_write(const Config *config, int file)
 {

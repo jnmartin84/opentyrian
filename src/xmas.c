@@ -72,7 +72,7 @@ bool xmas_prompt(void)
 	const int dyPrompt = 15;
 	const int wChoice = 40;
 	const int yChoice = 120;
-	const int hChoice = 13;
+//	const int hChoice = 13;
 	
 	size_t selectedIndex = 0;
 

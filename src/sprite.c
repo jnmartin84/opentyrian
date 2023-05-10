@@ -22,7 +22,7 @@
 #include "opentyr.h"
 #include "video.h"
 
-#include <assert.h>
+//#include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
 
@@ -426,7 +426,7 @@ void blit_sprite_dark(uint8_t *surface, int x, int y, unsigned int table, unsign
 {
 	if (index >= sprite_table[table].count || !sprite_exists(table, index))
 	{
-		assert(false);
+		//assert(false);
 		return;
 	}
 	
@@ -496,29 +496,20 @@ void JE_loadCompShapes(Sprite2_array *sprite2s, char s)
 	
 	dfs_close(f);
 }
-extern int errno;
+
 void JE_loadCompShapesB(Sprite2_array *sprite2s, int f)
 {
-	assert(sprite2s->data == NULL);
+//	assert(sprite2s->data == NULL);
 
 	sprite2s->data = malloc(sprite2s->size);
-#if 0
-	if (sprite2s->data == NULL) 
-	{
-		while (1)
-		{
-			printf("could not malloc %d\nfor sprite2s->data\n%s\n", sprite2s->size, strerror(errno));
-		}
-	}
-#endif
 	fread_u8_die(sprite2s->data, sprite2s->size, f);
 }
 
 void free_sprite2s(Sprite2_array *sprite2s)
 {
 	free(sprite2s->data);
-
 	sprite2s->data = NULL;
+
 	sprite2s->size = 0;
 }
 
@@ -811,7 +802,7 @@ void JE_loadMainShapeTables(const char *shpfile)
 	
 	fread_u16_die(&shpNumb, 1, f);
 
-	assert(shpNumb + 1u == COUNTOF(shpPos));
+	//assert(shpNumb + 1u == COUNTOF(shpPos));
 	
 	fread_s32_die(shpPos, shpNumb, f);
 	
