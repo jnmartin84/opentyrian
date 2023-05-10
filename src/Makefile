@@ -13,8 +13,7 @@ HEADERNAME = header
 LIBS = -ldragon -lc -lm -ldragonsys -lc
 LINK_FLAGS = -G4 -L$(ROOTDIR)/lib -L$(ROOTDIR)/mips64-elf/lib $(LIBS) -Tn64.ld
 PROG_NAME = opentyrian
-CFLAGS = -Wno-format-overflow -Wno-format-truncation -mno-shared -mno-abicalls -mno-branch-likely -mno-llsc -mno-check-zero-division -std=gnu99 -mabi=o64 -std=gnu99 -march=vr4300 -mtune=vr4300 -Wall -G4 -O3 -I$(ROOTDIR)/include -I$(ROOTDIR)/mips64-elf/include
-#-fno-strict-aliasing 
+CFLAGS = -Wno-format-overflow -Wno-format-truncation -mno-shared -mno-abicalls -mno-branch-likely -mno-llsc -mno-check-zero-division -std=gnu99 -mabi=o64 -std=gnu99 -march=vr4300 -mtune=vr4300 -Wall -g -G4 -O3 -I$(ROOTDIR)/include -I$(ROOTDIR)/mips64-elf/include
 
 
 CC = $(GCCN64PREFIX)gcc
@@ -26,12 +25,7 @@ OBJDUMP = $(GCCN64PREFIX)objdump
 
 O=obj
 
-#		n64memory.o	\
-#		samplerate.o	\
-#		src_linear.o	\
-#		src_zoh.o	\
-
-OBJS=						\
+OBJS=				\
 		animlib.o	\
 		arg_parse.o	\
 		backgrnd.o	\

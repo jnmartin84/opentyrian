@@ -44,7 +44,7 @@ void JE_loadPals(void)
 	int f = dir_fopen_die(data_dir(), "palette.dat", "rb");
 	
 	palette_count = ftell_eof(f) / (256 * 3);
-	assert(palette_count == PALETTE_COUNT);
+	//assert(palette_count == PALETTE_COUNT);
 	
 	for (int p = 0; p < palette_count; ++p)
 	{
@@ -125,7 +125,7 @@ void init_step_fade_solid(int diff[256][3], color_t color, unsigned int first_co
 
 void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, unsigned int last_color)
 {
-	assert(steps > 0);
+	//assert(steps > 0);
 	
 	for (unsigned int i = first_color; i <= last_color; i++)
 	{
@@ -154,7 +154,7 @@ void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, un
 
 void fade_palette(Palette colors, int steps, unsigned int first_color, unsigned int last_color)
 {
-	assert(steps > 0);
+	//assert(steps > 0);
 	
 	static int diff[256][3];
 	init_step_fade_palette(diff, colors, first_color, last_color);
@@ -173,7 +173,7 @@ void fade_palette(Palette colors, int steps, unsigned int first_color, unsigned 
 
 void fade_solid(color_t color, int steps, unsigned int first_color, unsigned int last_color)
 {
-	assert(steps > 0);
+	//assert(steps > 0);
 	
 	static int diff[256][3];
 	init_step_fade_solid(diff, color, first_color, last_color);
@@ -198,7 +198,6 @@ void fade_black(int steps)
 
 void fade_white(int steps)
 {
-	// FIXME
 	color_t white = { 255, 255, 255 };
 	fade_solid(white, steps, 0, 255);
 }

@@ -346,9 +346,10 @@ void unlockVideo(display_context_t dc)
 		display_show(dc);
 	}
 }
-#define USE_64BIT_WRITES 1
-extern Uint32 rgb_palette[256];
+
 extern Uint32 tworgb_palette[65536];
+#define USE_64BIT_WRITES 1
+
 void JE_showVGA(void) 
 { 
 	_dc = lockVideo(1);
