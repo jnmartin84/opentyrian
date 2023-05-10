@@ -94,9 +94,9 @@ void set_colors(color_t color, unsigned int first_color, unsigned int last_color
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
 	}
 
-	for (uint x = 0; x < 256; x++)
+	for (uint x = first_color; x <= last_color; x++)
 	{
-		for (uint y = 0; y < 256; y++)
+		for (uint y = first_color; y <= last_color; y++)
 		{
 			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
 		}
@@ -143,9 +143,9 @@ void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, un
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
 	}
 
-	for (uint x = 0; x < 256; x++)
+	for (uint x = first_color; x <= last_color; x++)
 	{
-		for (uint y = 0; y < 256; y++)
+		for (uint y = first_color; y <= last_color; y++)
 		{
 			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
 		}
