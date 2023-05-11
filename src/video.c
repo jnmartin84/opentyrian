@@ -40,6 +40,10 @@ int fullscreen_display;
 ScalingMode scaling_mode = SCALE_INTEGER;
 //static SDL_Rect last_output_rect = { 0, 0, vga_width, vga_height };
 
+uint8_t __attribute__((aligned(64))) pbuf[320*200];
+uint8_t __attribute__((aligned(64))) pbuf2[320*200];
+uint8_t __attribute__((aligned(64))) pbuf3[320*200];
+
 uint8_t *VGAScreen, *VGAScreenSeg;
 uint8_t *VGAScreen2;
 uint8_t *game_screen;
@@ -62,18 +66,23 @@ static void deinit_texture(void);
 //static void scale_and_flip(SDL_Surface *);
 extern void *__safe_buffer[];
 
+#define OUTPUT_WIDTH 320
+
 void init_video(void)
 {
 	console_clear();
 	console_close();
-	memset((uint16_t *)(__safe_buffer[0]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
-    memset((uint16_t *)(__safe_buffer[1]), 0, 320*240*2);//SCREENWIDTH*2*32);//336*2);
-
+	memset((uint16_t *)(__safe_buffer[0]), 0, OUTPUT_WIDTH*240*2);//SCREENWIDTH*2*32);//336*2);
+    memset((uint16_t *)(__safe_buffer[1]), 0, OUTPUT_WIDTH*240*2);//SCREENWIDTH*2*32);//336*2);
+#if OUTPUT_WIDTH == 512
+	display_init(RESOLUTION_512x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
+#elif OUTPUT_WIDTH == 320
 	display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
-	VGAScreenSeg = malloc(320*200);
+#endif
+	VGAScreenSeg = pbuf;//malloc(320*200 + 64);
 	VGAScreen = VGAScreenSeg;// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	VGAScreen2 = malloc(320*200);//SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	game_screen = malloc(320*200);// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
+	VGAScreen2 = pbuf2;//malloc(320*200);//SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
+	game_screen = pbuf3;//malloc(320*200);// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
 	JE_clr256(VGAScreen);
 
 	// Create the window with a temporary initial size, hidden until we set up the
@@ -354,6 +363,25 @@ void JE_showVGA(void)
 { 
 	_dc = lockVideo(1);
 
+#if OUTPUT_WIDTH == 512
+	for (uint y=0;y<200;y++) {
+		uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (96*2) + ((20+y)*512*2));
+		uint32_t *src32 = (uint32_t *)(VGAScreen + (y*320));
+
+		for (uint x=0;x<80;x++) {
+			// read 4 pixels from 8-bit frame buffer
+			uint32_t src_four1 = *src32++;
+			// color index first two pixels to get 2 16-bit pixels
+			uint32_t src12 = tworgb_palette[(src_four1 >> 16)];
+			// color index second two pixels to get 2 more 16-bit pixels
+			uint32_t src34 = tworgb_palette[(src_four1 & 0xffff)];
+			*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
+		}
+	}
+
+#endif
+
+#if OUTPUT_WIDTH == 320
 #if USE_64BIT_WRITES
 	// Nintendo 64 frame buffer, 64-bit pointer to 20th row
 	uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
@@ -430,6 +458,7 @@ void JE_showVGA(void)
 		*dst32++ = src12;
 		*dst32++ = src34;			
 	}
+#endif
 #endif
 	unlockVideo(_dc);
 }
