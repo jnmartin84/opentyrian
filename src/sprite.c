@@ -63,7 +63,7 @@ void load_sprites(unsigned int table, int f)
 	
 	sprite_table[table].count = temp;
 	
-	assert(sprite_table[table].count <= SPRITES_PER_TABLE_MAX);
+	//assert(sprite_table[table].count <= SPRITES_PER_TABLE_MAX);
 	
 	for (unsigned int i = 0; i < sprite_table[table].count; ++i)
 	{
@@ -164,9 +164,10 @@ void blit_sprite(uint8_t *surface, int x, int y, unsigned int table, unsigned in
 // does not clip on left or right edges of surface
 void blit_sprite_blend(uint8_t *surface, int x, int y, unsigned int table, unsigned int index)
 {
+#if 1
 	if (index >= sprite_table[table].count || !sprite_exists(table, index))
 	{
-		assert(false);
+		//assert(false);
 		return;
 	}
 	
@@ -219,6 +220,7 @@ void blit_sprite_blend(uint8_t *surface, int x, int y, unsigned int table, unsig
 			x_offset = 0;
 		}
 	}
+#endif	
 }
 
 // does not clip on left or right edges of surface
@@ -228,7 +230,7 @@ void blit_sprite_hv_unsafe(uint8_t *surface, int x, int y, unsigned int table, u
 {
 	if (index >= sprite_table[table].count || !sprite_exists(table, index))
 	{
-		assert(false);
+		//assert(false);
 		return;
 	}
 	
@@ -290,7 +292,7 @@ void blit_sprite_hv(uint8_t *surface, int x, int y, unsigned int table, unsigned
 {
 	if (index >= sprite_table[table].count || !sprite_exists(table, index))
 	{
-		assert(false);
+		//assert(false);
 		return;
 	}
 	
@@ -358,7 +360,7 @@ void blit_sprite_hv_blend(uint8_t *surface, int x, int y, unsigned int table, un
 {
 	if (index >= sprite_table[table].count || !sprite_exists(table, index))
 	{
-		assert(false);
+		//assert(false);
 		return;
 	}
 	
@@ -499,7 +501,7 @@ void JE_loadCompShapes(Sprite2_array *sprite2s, char s)
 
 void JE_loadCompShapesB(Sprite2_array *sprite2s, int f)
 {
-//	assert(sprite2s->data == NULL);
+//	//assert(sprite2s->data == NULL);
 
 	sprite2s->data = malloc(sprite2s->size);
 	fread_u8_die(sprite2s->data, sprite2s->size, f);
@@ -516,18 +518,21 @@ void free_sprite2s(Sprite2_array *sprite2s)
 // does not clip on left or right edges of surface
 void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
+#if 0
+	blit_sprite2_clip(surface, x, y, sprite2s, index);
+#endif
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
 	const Uint8 * const pixels_ll = (Uint8 *)surface/*->pixels*/,  // lower limit
 	            * const pixels_ul = (Uint8 *)surface/*->pixels*/ + (/*surface->h*/screenheight * /*surface->pitch*/screenpitch);  // upper limit
 	
 	const Uint8 *data = sprite2s.data + SHORT(((Uint16 *)sprite2s.data)[index - 1]);
-	
+
 	for (; *data != 0x0f; ++data)
 	{
 		pixels += *data & 0x0f;                   // second nibble: transparent pixel count
 		unsigned int count = (*data & 0xf0) >> 4; // first nibble: opaque pixel count
-		
+
 		if (count == 0) // move to next pixel row
 		{
 			pixels += /*VGAScreen->pitch*/screenpitch - 12;
@@ -540,9 +545,10 @@ void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsign
 				
 				if (pixels >= pixels_ul)
 					return;
-				if (pixels >= pixels_ll)
+				if (pixels >= pixels_ll) 
+				{
 					*pixels = *data;
-				
+				}
 				++pixels;
 			}
 		}
@@ -552,16 +558,28 @@ void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsign
 void blit_sprite2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
 	//assert(surface->format->BitsPerPixel == 8);
-
+	int oy = y;
+	int ox = x;
+	Uint8 totalskipsandfills = 0;
 	const Uint8 *data = sprite2s.data + SHORT(((Uint16 *)sprite2s.data)[index - 1]);
 
 	for (; *data != 0x0f; ++data)
 	{
+		if(totalskipsandfills > 255)
+			return;
+		if(y - oy > 15)
+			return;
+		if(x - ox > 15)
+			return;
+
 		if (y >= /*surface->h*/screenheight)
 			return;
 
 		Uint8 skip_count = *data & 0x0f;
 		Uint8 fill_count = (*data >> 4) & 0x0f;
+
+		totalskipsandfills += skip_count;
+		totalskipsandfills += fill_count;
 
 		x += skip_count;
 
@@ -572,9 +590,14 @@ void blit_sprite2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, u
 		}
 		else if (y >= 0)
 		{
-			Uint8 *const pixel_row = (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch);
+ 			Uint8 *const pixel_row = (Uint8 *)(surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch));
 			do
 			{
+				// I think it is possible that there is something wrong with sprite data
+				// in the version of Tyrian game data I downloaded
+				// I don't know if it is a problem for other people or platforms, but without this,
+				// I get a few lines of trash sprayed into VGAScreen for certain enemy types
+				// this doesn't completely get rid of it, but seems to limit it more than anything else I've tried
 				++data;
 
 				if (x >= 0 && x < /*surface->pitch*/screenpitch)
@@ -589,10 +612,14 @@ void blit_sprite2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, u
 		}
 	}
 }
+void blit_sprite2_blend_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index);
 
 // does not clip on left or right edges of surface
 void blit_sprite2_blend(uint8_t *surface,  int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
+#if 0	
+	blit_sprite2_blend_clip(surface,x,y,sprite2s,index);
+#endif	
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
 	const Uint8 * const pixels_ll = (Uint8 *)surface/*->pixels*/,  // lower limit
@@ -626,9 +653,55 @@ void blit_sprite2_blend(uint8_t *surface,  int x, int y, Sprite2_array sprite2s,
 	}
 }
 
+void blit_sprite2_blend_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
+{
+	//assert(surface->format->BitsPerPixel == 8);
+
+	const Uint8 *data = sprite2s.data + SHORT(((Uint16 *)sprite2s.data)[index - 1]);
+
+	for (; *data != 0x0f; ++data)
+	{
+		if (y >= /*surface->h*/screenheight)
+			return;
+
+		Uint8 skip_count = *data & 0x0f;
+		Uint8 fill_count = (*data >> 4) & 0x0f;
+
+		x += skip_count;
+
+		if (fill_count == 0) // move to next pixel row
+		{
+			y += 1;
+			x -= 12;
+		}
+		else if (y >= 0)
+		{
+			Uint8 *const pixel_row = (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch);
+			do
+			{
+				++data;
+
+				if (x >= 0 && x < /*surface->pitch*/screenpitch)
+					pixel_row[x] =  (((*data & 0x0f) + (pixel_row[x] & 0x0f)) / 2) | (*data & 0xf0);//*data;
+				x += 1;
+			} while (--fill_count);
+		}
+		else
+		{
+			data += fill_count;
+			x += fill_count;
+		}
+	}
+}
+
+void blit_sprite2_darken_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index);
+
 // does not clip on left or right edges of surface
 void blit_sprite2_darken(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
+#if 0
+	blit_sprite2_darken_clip(surface,x,y,sprite2s,index);
+#endif	
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
 	const Uint8 * const pixels_ll = (Uint8 *)surface/*->pixels*/,  // lower limit
@@ -662,9 +735,53 @@ void blit_sprite2_darken(uint8_t *surface, int x, int y, Sprite2_array sprite2s,
 	}
 }
 
+void blit_sprite2_darken_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
+{
+	//assert(surface->format->BitsPerPixel == 8);
+
+	const Uint8 *data = sprite2s.data + SHORT(((Uint16 *)sprite2s.data)[index - 1]);
+
+	for (; *data != 0x0f; ++data)
+	{
+		if (y >= /*surface->h*/screenheight)
+			return;
+
+		Uint8 skip_count = *data & 0x0f;
+		Uint8 fill_count = (*data >> 4) & 0x0f;
+
+		x += skip_count;
+
+		if (fill_count == 0) // move to next pixel row
+		{
+			y += 1;
+			x -= 12;
+		}
+		else if (y >= 0)
+		{
+			Uint8 *const pixel_row = (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch);
+			do
+			{
+				++data;
+
+				if (x >= 0 && x < /*surface->pitch*/screenpitch)
+					pixel_row[x] =  ((pixel_row[x] & 0x0f) / 2) + (pixel_row[x] & 0xf0);//((*pixels & 0x0f) / 2) + (*pixels & 0xf0)
+				x += 1;
+			} while (--fill_count);
+		}
+		else
+		{
+			data += fill_count;
+			x += fill_count;
+		}
+	}
+}
+
 // does not clip on left or right edges of surface
 void blit_sprite2_filter(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index, Uint8 filter)
 {
+#if 0	
+	blit_sprite2_filter_clip(surface,x,y,sprite2s,index,filter);
+#endif	
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
 	const Uint8 * const pixels_ll = (Uint8 *)surface/*->pixels*/,  // lower limit
