@@ -1357,9 +1357,6 @@ void JE_gammaCorrect(Palette *colorBuffer, JE_byte gamma)
 
 JE_boolean JE_gammaCheck(void)
 {
-	// FIXME
-	return 0;
-#if 0
 	bool temp = keysactive[SDL_SCANCODE_F11] != 0;
 	if (temp)
 	{
@@ -1371,7 +1368,6 @@ JE_boolean JE_gammaCheck(void)
 		set_palette(colors, 0, 255);
 	}
 	return temp;
-#endif
 }
 
 void JE_doInGameSetup(void)
