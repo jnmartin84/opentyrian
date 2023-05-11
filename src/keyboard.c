@@ -229,6 +229,12 @@ void service_SDL_events(JE_boolean clear_new)
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
+			}
+			if (ev.key == ctrlr_c_up) {
+				SDL_Scancode sc = SDL_SCANCODE_F11;
+				keysactive[sc] = 0;
+				keydown = false;
+				return;
 			}	
 			return;
 		}
@@ -318,6 +324,15 @@ void service_SDL_events(JE_boolean clear_new)
 			}
 			if (ev.key == ctrlr_start) {
 				SDL_Scancode sc = SDL_SCANCODE_P;
+				keysactive[sc] = 1;
+				newkey = true;
+				lastkey_scan = sc;
+				lastkey_mod = 0;
+				keydown = true;
+				return;
+			}
+			if (ev.key == ctrlr_c_up) {
+				SDL_Scancode sc = SDL_SCANCODE_F11;
 				keysactive[sc] = 1;
 				newkey = true;
 				lastkey_scan = sc;
