@@ -828,7 +828,7 @@ void JE_loadConfiguration(void)
 		tyrMusicVolume = 191;
 		fxVolume = 191;
 		gammaCorrection = 0;
-		processorType = 1;//3;//4
+		processorType = 3;//3;//4
 		gameSpeed = 3;
 	}
 	

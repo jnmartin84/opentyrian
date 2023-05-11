@@ -1153,10 +1153,10 @@ int main(int argc, char *argv[])
 #endif
 	}
 
-#ifdef NDEBUG
+//#ifdef NDEBUG
 	if (!isNetworkGame)
 		intro_logos();
-#endif
+//#endif
 
 	for (; ; )
 	{
