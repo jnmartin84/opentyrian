@@ -61,7 +61,7 @@ void flush_events_buffer(void)
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev));
 #endif
-	input_event_t ev;
+	input_event_t *ev;
 	while (pop_input_queue(&ev));
 }
 
@@ -154,7 +154,8 @@ void mouseGetRelativePosition(Sint32 *const out_x, Sint32 *const out_y)
 #endif
 }
 extern input_event_t input_queue[1024];
-
+bool debugging = false;
+bool next_sprite = false;
 void service_SDL_events(JE_boolean clear_new)
 {
 	if (clear_new)
@@ -164,84 +165,88 @@ void service_SDL_events(JE_boolean clear_new)
 		new_text = false;
 	}
 
-	input_event_t ev;
+	input_event_t *ev;
 	while (pop_input_queue(&ev))
 	{
 		// released
-		if (ev.down == 0)
+		if (ev->down == 0)
 		{  
-			if (ev.key == ctrlr_up) {
+			if (ev->key == ctrlr_up) {
 				SDL_Scancode sc = SDL_SCANCODE_UP;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_down) {
+			if (ev->key == ctrlr_down) {
 				SDL_Scancode sc = SDL_SCANCODE_DOWN;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_left) {
+			if (ev->key == ctrlr_left) {
 				SDL_Scancode sc = SDL_SCANCODE_LEFT;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_right) {
+			if (ev->key == ctrlr_right) {
 				SDL_Scancode sc = SDL_SCANCODE_RIGHT;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_l) {
+			if (ev->key == ctrlr_l) {
 				SDL_Scancode sc = SDL_SCANCODE_LCTRL;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_r) {
+			if (ev->key == ctrlr_r) {
 				SDL_Scancode sc = SDL_SCANCODE_LALT;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_z) {
+			if (ev->key == ctrlr_z) {
 				SDL_Scancode sc = SDL_SCANCODE_ESCAPE;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_a) {
+			if (ev->key == ctrlr_a) {
 				SDL_Scancode sc = SDL_SCANCODE_SPACE;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_b) {
+			if (ev->key == ctrlr_b) {
 				SDL_Scancode sc = SDL_SCANCODE_RETURN;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_start) {
+			if (ev->key == ctrlr_start) {
 				SDL_Scancode sc = SDL_SCANCODE_P;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
 			}
-			if (ev.key == ctrlr_c_up) {
+			if (ev->key == ctrlr_c_up) {
 				SDL_Scancode sc = SDL_SCANCODE_F11;
 				keysactive[sc] = 0;
 				keydown = false;
 				return;
-			}	
+			}
+//			if (ev->key == ctrlr_c_down) {
+//				debugging = !debugging;
+//				return;
+//			}
 			return;
 		}
 		// pressed
-		else if (ev.down) 
+		else if (ev->down) 
 		{
-			if (ev.key == ctrlr_up) {
+			if (ev->key == ctrlr_up) {
 				SDL_Scancode sc = SDL_SCANCODE_UP;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -250,7 +255,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_down) {
+			if (ev->key == ctrlr_down) {
 				SDL_Scancode sc = SDL_SCANCODE_DOWN;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -259,7 +264,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_left) {
+			if (ev->key == ctrlr_left) {
 				SDL_Scancode sc = SDL_SCANCODE_LEFT;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -268,7 +273,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_right) {
+			if (ev->key == ctrlr_right) {
 				SDL_Scancode sc = SDL_SCANCODE_RIGHT;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -277,7 +282,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_l) {
+			if (ev->key == ctrlr_l) {
 				SDL_Scancode sc = SDL_SCANCODE_LCTRL;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -286,7 +291,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_r) {
+			if (ev->key == ctrlr_r) {
 				SDL_Scancode sc = SDL_SCANCODE_LALT;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -295,7 +300,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_z) {
+			if (ev->key == ctrlr_z) {
 				SDL_Scancode sc = SDL_SCANCODE_ESCAPE;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -304,7 +309,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_a) {
+			if (ev->key == ctrlr_a) {
 				SDL_Scancode sc = SDL_SCANCODE_SPACE;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -313,7 +318,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_b) {
+			if (ev->key == ctrlr_b) {
 				SDL_Scancode sc = SDL_SCANCODE_RETURN;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -322,7 +327,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_start) {
+			if (ev->key == ctrlr_start) {
 				SDL_Scancode sc = SDL_SCANCODE_P;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -331,7 +336,7 @@ void service_SDL_events(JE_boolean clear_new)
 				keydown = true;
 				return;
 			}
-			if (ev.key == ctrlr_c_up) {
+			if (ev->key == ctrlr_c_up) {
 				SDL_Scancode sc = SDL_SCANCODE_F11;
 				keysactive[sc] = 1;
 				newkey = true;
@@ -339,7 +344,7 @@ void service_SDL_events(JE_boolean clear_new)
 				lastkey_mod = 0;
 				keydown = true;
 				return;
-			}	
+			}
 			return;
 		}
 	}

@@ -72,8 +72,6 @@ void init_video(void)
 {
 	console_clear();
 	console_close();
-	memset((uint16_t *)(__safe_buffer[0]), 0, OUTPUT_WIDTH*240*2);//SCREENWIDTH*2*32);//336*2);
-    memset((uint16_t *)(__safe_buffer[1]), 0, OUTPUT_WIDTH*240*2);//SCREENWIDTH*2*32);//336*2);
 #if OUTPUT_WIDTH == 512
 	display_init(RESOLUTION_512x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
 #elif OUTPUT_WIDTH == 320
@@ -330,11 +328,11 @@ void JE_clr256(uint8_t *screen)
 //	SDL_FillRect(screen, NULL, 0);
 memset(screen,0,320*200);
 }
-display_context_t _dc;
+surface_t *_surface;
 
-display_context_t lockVideo(int wait)
+surface_t *lockVideo(int wait)
 {
-	display_context_t dc;
+	surface_t *dc;
 
 	if (wait)
 	{
@@ -348,7 +346,7 @@ display_context_t lockVideo(int wait)
 	return dc;
 }
 
-void unlockVideo(display_context_t dc)
+void unlockVideo(surface_t *dc)
 {
 	if (dc)
 	{
@@ -361,11 +359,11 @@ extern Uint32 tworgb_palette[65536];
 
 void JE_showVGA(void) 
 { 
-	_dc = lockVideo(1);
+	_surface = lockVideo(1);
 
 #if OUTPUT_WIDTH == 512
 	for (uint y=0;y<200;y++) {
-		uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (96*2) + ((20+y)*512*2));
+		uint64_t *dst64 = (uint64_t *)((uintptr_t)_surface->buffer + (96*2) + ((20+y)*512*2));
 		uint32_t *src32 = (uint32_t *)(VGAScreen + (y*320));
 
 		for (uint x=0;x<80;x++) {
@@ -384,7 +382,7 @@ void JE_showVGA(void)
 #if OUTPUT_WIDTH == 320
 #if USE_64BIT_WRITES
 	// Nintendo 64 frame buffer, 64-bit pointer to 20th row
-	uint64_t *dst64 = (uint64_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+	uint64_t *dst64 = (uint64_t *)((uintptr_t)_surface->buffer + (uintptr_t)12800);
 	// OpenTyrian frame buffer, 32-bit pointer to 1st row
 	uint32_t *src32 = (uint32_t *)VGAScreen;
 
@@ -429,7 +427,7 @@ void JE_showVGA(void)
 		*dst64++ = (uint64_t)(((uint64_t)src12<<32)|(uint64_t)src34);
 	}
 #else
-	uint32_t *dst32 = (uint32_t *)((uintptr_t)__safe_buffer[(_dc-1)] + (uintptr_t)12800);
+	uint32_t *dst32 = (uint32_t *)((uintptr_t)_surface->buffer + (uintptr_t)12800);
 	uint32_t *src32 = (uint32_t *)VGAScreen;
 	for (uint n=0;n<4000;n++)
 	{
@@ -460,7 +458,7 @@ void JE_showVGA(void)
 	}
 #endif
 #endif
-	unlockVideo(_dc);
+	unlockVideo(_surface);
 }
 
 #if 0

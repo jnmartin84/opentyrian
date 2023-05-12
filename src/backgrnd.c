@@ -63,7 +63,7 @@ void JE_darkenBackground(JE_word neat)  /* wild detail level */
 void blit_background_row(uint8_t *surface, int x, int y, Uint8 **map)
 {
 //	assert(surface->format->BitsPerPixel == 8);
-	
+	return;
 	Uint8 *pixels = (Uint8 *)surface + (y * screenpitch) + x,
 	      *pixels_ll = (Uint8 *)surface,  // lower limit
 	      *pixels_ul = (Uint8 *)surface + (screenheight * screenpitch);  // upper limit
@@ -109,7 +109,7 @@ void blit_background_row(uint8_t *surface, int x, int y, Uint8 **map)
 void blit_background_row_blend(uint8_t *surface, int x, int y, Uint8 **map)
 {
 //	assert(surface->format->BitsPerPixel == 8);
-	
+	return;
 	Uint8 *pixels = (Uint8 *)surface + (y * screenpitch) + x,
 	      *pixels_ll = (Uint8 *)surface,  // lower limit
 	      *pixels_ul = (Uint8 *)surface + (screenheight * screenpitch);  // upper limit

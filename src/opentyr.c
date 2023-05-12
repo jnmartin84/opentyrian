@@ -771,14 +771,14 @@ iq_len = 0;
 iq_start = 0;
 }
 
-bool pop_input_queue(input_event_t *ev) {
+bool pop_input_queue(input_event_t **ev) {
 	if(iq_len == 0) {
 		return false;
 	}
 	else if(iq_len > 0 && iq_start < iq_len) {
-	//ev = &input_queue[iq_start];
-	ev->down = input_queue[iq_start].down;
-	ev->key = input_queue[iq_start].key;
+	*ev = &input_queue[iq_start];
+	//ev->down = input_queue[iq_start].down;
+	//ev->key = input_queue[iq_start].key;
 	iq_start++;
 	return true;
 	}

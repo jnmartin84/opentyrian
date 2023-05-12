@@ -125,7 +125,7 @@ typedef struct input_event_s {
 
 void reset_input_queue(void);
 void update_input_queue(void);
-bool pop_input_queue(input_event_t *ev);
+bool pop_input_queue(input_event_t **ev);
 uint32_t n64_GetTicks();
 void n64_Delay(uint32_t tick);
 void setupMenu(void);
