@@ -514,36 +514,24 @@ void free_sprite2s(Sprite2_array *sprite2s)
 
 	sprite2s->size = 0;
 }
-Sprite2_array *dbgspr;
-Uint8* dbgptr;
+
 // does not clip on left or right edges of surface
 void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
-#if 0
-	blit_sprite2_clip(surface, x, y, sprite2s, index);
-#endif
+	blit_sprite2_clip(surface,x,y,sprite2s,index);
+	return;
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
 	const Uint8 * const pixels_ll = (Uint8 *)surface/*->pixels*/,  // lower limit
 	            * const pixels_ul = (Uint8 *)surface/*->pixels*/ + (/*surface->h*/screenheight * /*surface->pitch*/screenpitch);  // upper limit
 	
 	const Uint8 *data = sprite2s.data + SHORT(((Uint16 *)sprite2s.data)[index - 1]);
-dbgspr = &sprite2s;
-dbgptr = data;
-unsigned int totalpix = 0;
 
 	for (; *data != 0x0f; ++data)
 	{
 		unsigned int skippix = *data & 0x0f;
 		pixels += skippix;                   // second nibble: transparent pixel count
 		unsigned int count = (*data & 0xf0) >> 4; // first nibble: opaque pixel count
-
-		totalpix = skippix + count;
-
-			if (totalpix > 256) {
-				fprintf(stderr, "%08x %08x\n", dbgspr, dbgptr);
-//				while(1) {}
-			}
 
 		if (count == 0) // move to next pixel row
 		{
@@ -871,6 +859,9 @@ void blit_sprite2_filter_clip(uint8_t *surface, int x, int y, Sprite2_array spri
 // does not clip on left or right edges of surface
 void blit_sprite2x2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
+	blit_sprite2x2_clip(surface,x,y,sprite2s,index);
+	return;
+
 	blit_sprite2(surface, x,      y,      sprite2s, index);
 	blit_sprite2(surface, x + 12, y,      sprite2s, index + 1);
 	blit_sprite2(surface, x,      y + 14, sprite2s, index + 19);
@@ -879,7 +870,6 @@ void blit_sprite2x2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsi
 
 void blit_sprite2x2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
-	return;
 	blit_sprite2_clip(surface, x,      y,      sprite2s, index);
 	blit_sprite2_clip(surface, x + 12, y,      sprite2s, index + 1);
 	blit_sprite2_clip(surface, x,      y + 14, sprite2s, index + 19);
@@ -889,7 +879,6 @@ void blit_sprite2x2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s,
 // does not clip on left or right edges of surface
 void blit_sprite2x2_blend(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
-	return;
 	blit_sprite2_blend(surface, x,      y,      sprite2s, index);
 	blit_sprite2_blend(surface, x + 12, y,      sprite2s, index + 1);
 	blit_sprite2_blend(surface, x,      y + 14, sprite2s, index + 19);
@@ -899,7 +888,6 @@ void blit_sprite2x2_blend(uint8_t *surface, int x, int y, Sprite2_array sprite2s
 // does not clip on left or right edges of surface
 void blit_sprite2x2_darken(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
-	return;
 	blit_sprite2_darken(surface, x,      y,      sprite2s, index);
 	blit_sprite2_darken(surface, x + 12, y,      sprite2s, index + 1);
 	blit_sprite2_darken(surface, x,      y + 14, sprite2s, index + 19);
@@ -909,7 +897,6 @@ void blit_sprite2x2_darken(uint8_t *surface, int x, int y, Sprite2_array sprite2
 // does not clip on left or right edges of surface
 void blit_sprite2x2_filter(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index, Uint8 filter)
 {
-	return;
 	blit_sprite2_filter(surface, x,      y,      sprite2s, index, filter);
 	blit_sprite2_filter(surface, x + 12, y,      sprite2s, index + 1, filter);
 	blit_sprite2_filter(surface, x,      y + 14, sprite2s, index + 19, filter);
@@ -918,7 +905,6 @@ void blit_sprite2x2_filter(uint8_t *surface, int x, int y, Sprite2_array sprite2
 
 void blit_sprite2x2_filter_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index, Uint8 filter)
 {
-	return;
 	blit_sprite2_filter_clip(surface, x,      y,      sprite2s, index, filter);
 	blit_sprite2_filter_clip(surface, x + 12, y,      sprite2s, index + 1, filter);
 	blit_sprite2_filter_clip(surface, x,      y + 14, sprite2s, index + 19, filter);
