@@ -79,6 +79,7 @@ void load_sprites(unsigned int table, int f)
 		fread_u16_die(&cur_sprite->size,   1, f);
 
 		cur_sprite->data = malloc(cur_sprite->size);
+		memset(cur_sprite->data, 0x0f, cur_sprite->size);
 
 		fread_u8_die(cur_sprite->data, cur_sprite->size, f);
 	}
@@ -504,6 +505,7 @@ void JE_loadCompShapesB(Sprite2_array *sprite2s, int f)
 //	//assert(sprite2s->data == NULL);
 
 	sprite2s->data = malloc(sprite2s->size);
+	memset(sprite2s->data, 0x0f, sprite2s->size);
 	fread_u8_die(sprite2s->data, sprite2s->size, f);
 }
 
@@ -519,6 +521,7 @@ void free_sprite2s(Sprite2_array *sprite2s)
 void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
 	blit_sprite2_clip(surface,x,y,sprite2s,index);
+#if 0
 	return;
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
@@ -553,6 +556,7 @@ void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsign
 			}
 		}
 	}
+#endif	
 }
 
 void blit_sprite2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
@@ -859,8 +863,10 @@ void blit_sprite2_filter_clip(uint8_t *surface, int x, int y, Sprite2_array spri
 // does not clip on left or right edges of surface
 void blit_sprite2x2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
+#if 0
 	blit_sprite2x2_clip(surface,x,y,sprite2s,index);
 	return;
+#endif
 
 	blit_sprite2(surface, x,      y,      sprite2s, index);
 	blit_sprite2(surface, x + 12, y,      sprite2s, index + 1);
