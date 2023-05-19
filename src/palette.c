@@ -33,10 +33,10 @@ Palette palettes[PALETTE_COUNT];
 int palette_count;
 
 static Palette palette;
-Uint32 rgb_palette[256], yuv_palette[256];
-
+Uint16 rgb_palette[256], yuv_palette[256];
+#if 0
 Uint32 tworgb_palette[65536];
-
+#endif
 Palette colors;
 
 void JE_loadPals(void)
@@ -75,7 +75,7 @@ void set_palette(Palette colors, unsigned int first_color, unsigned int last_col
 		rgb_palette[i] = graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
 	}
-
+#if 0
 	for (uint x = 0; x < 256; x++)
 	{
 		for (uint y = 0; y < 256; y++)
@@ -83,6 +83,7 @@ void set_palette(Palette colors, unsigned int first_color, unsigned int last_col
 			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
 		}
 	}
+#endif
 }
 
 void set_colors(color_t color, unsigned int first_color, unsigned int last_color)
@@ -93,7 +94,7 @@ void set_colors(color_t color, unsigned int first_color, unsigned int last_color
 		rgb_palette[i] = graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
 	}
-
+#if 0
 	for (uint x = first_color; x <= last_color; x++)
 	{
 		for (uint y = first_color; y <= last_color; y++)
@@ -101,6 +102,7 @@ void set_colors(color_t color, unsigned int first_color, unsigned int last_color
 			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
 		}
 	}
+#endif
 }
 
 void init_step_fade_palette(int diff[256][3], Palette colors, unsigned int first_color, unsigned int last_color)
@@ -142,7 +144,7 @@ void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, un
 		rgb_palette[i] = graphics_make_color(palette[i].r, palette[i].g, palette[i].b,0);
 		yuv_palette[i] = rgb_to_yuv(palette[i].r, palette[i].g, palette[i].b);
 	}
-
+#if 0
 	for (uint x = first_color; x <= last_color; x++)
 	{
 		for (uint y = first_color; y <= last_color; y++)
@@ -150,6 +152,7 @@ void step_fade_palette(int diff[256][3], int steps, unsigned int first_color, un
 			tworgb_palette[(x << 8) | y] = (rgb_palette[x] & 0xffff0000) | (rgb_palette[y] & 0x0000ffff); 
 		}
 	}
+#endif
 }
 
 void fade_palette(Palette colors, int steps, unsigned int first_color, unsigned int last_color)

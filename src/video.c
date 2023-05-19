@@ -1,5 +1,5 @@
 /*
- * OpenTyrian: A modern cross-platform port of Tyrian
+r * OpenTyrian: A modern cross-platform port of Tyrian
  * Copyright (C) 2007-2009  The OpenTyrian Development Team
  *
  * This program is free software; you can redistribute it and/or
@@ -64,8 +64,8 @@ static void deinit_texture(void);
 //static void window_center_in_display(int display_index);
 //static void calc_dst_render_rect(uint8_t *src_surface, SDL_Rect *dst_rect);
 //static void scale_and_flip(SDL_Surface *);
-extern void *__safe_buffer[];
-
+//extern void *__safe_buffer[];
+extern uint16_t rgb_palette[256];
 #define OUTPUT_WIDTH 320
 
 void init_video(void)
@@ -75,8 +75,19 @@ void init_video(void)
 #if OUTPUT_WIDTH == 512
 	display_init(RESOLUTION_512x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
 #elif OUTPUT_WIDTH == 320
-	display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
+	//display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
+    display_init( (resolution_t)
+	{
+		.width = 320,
+		.height = 200,
+		.interlaced = false,
+	}, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE );
 #endif
+
+
+    rdpq_init();
+    rdpq_debug_start();
+
 	VGAScreenSeg = pbuf;//malloc(320*200 + 64);
 	VGAScreen = VGAScreenSeg;// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
 	VGAScreen2 = pbuf2;//malloc(320*200);//SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
@@ -355,12 +366,42 @@ void unlockVideo(surface_t *dc)
 }
 
 extern Uint32 tworgb_palette[65536];
+#define SW_RAST 0
+#define RDP_RAST 1
 #define USE_64BIT_WRITES 1
 
 void JE_showVGA(void) 
 { 
-	_surface = lockVideo(1);
 
+#if RDP_RAST
+    surface_t *disp;
+
+    data_cache_hit_writeback(VGAScreen, 320*200);
+
+
+    while( !(disp = display_lock()) );
+    // Attach the RDP to the display buffer
+    rdpq_attach_clear(disp, NULL);
+
+    // Load the palette
+    data_cache_hit_writeback(rgb_palette, 256*2);
+    rdpq_tex_load_tlut(rgb_palette, 0, 256);
+
+    // Set copy render mode, with palette lookup
+    rdpq_set_mode_copy(false);
+    rdpq_mode_tlut(TLUT_RGBA16);
+
+    // Blit the surface onto the display
+    surface_t src = surface_make(VGAScreen, FMT_CI8, 320, 200, 320);
+    rdpq_tex_blit(&src, 0, 0, NULL);
+
+    // Detach from the surface and display it once done
+    rdpq_detach_show();
+    return;
+#endif
+
+#if SW_RAST
+	_surface = lockVideo(1);
 #if OUTPUT_WIDTH == 512
 	for (uint y=0;y<200;y++) {
 		uint64_t *dst64 = (uint64_t *)((uintptr_t)_surface->buffer + (96*2) + ((20+y)*512*2));
@@ -459,6 +500,7 @@ void JE_showVGA(void)
 #endif
 #endif
 	unlockVideo(_surface);
+#endif
 }
 
 #if 0

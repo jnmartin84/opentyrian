@@ -29,7 +29,7 @@ typedef color_t Palette[256];
 extern Palette palettes[];
 extern int palette_count;
 
-extern Uint32 rgb_palette[256], yuv_palette[256];
+extern Uint16 rgb_palette[256], yuv_palette[256];
 
 extern Palette colors; // TODO: get rid of this
 
