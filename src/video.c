@@ -66,33 +66,26 @@ static void deinit_texture(void);
 //static void scale_and_flip(SDL_Surface *);
 //extern void *__safe_buffer[];
 extern uint16_t rgb_palette[256];
-#define OUTPUT_WIDTH 320
 
 void init_video(void)
 {
 	console_clear();
 	console_close();
-#if OUTPUT_WIDTH == 512
-	display_init(RESOLUTION_512x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
-#elif OUTPUT_WIDTH == 320
-	//display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
-    display_init( (resolution_t)
+
+	display_init( (resolution_t)
 	{
 		.width = 320,
 		.height = 200,
 		.interlaced = false,
 	}, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE );
-#endif
 
-
-    rdpq_init();
-    rdpq_debug_start();
-
-	VGAScreenSeg = pbuf;//malloc(320*200 + 64);
-	VGAScreen = VGAScreenSeg;// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	VGAScreen2 = pbuf2;//malloc(320*200);//SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	game_screen = pbuf3;//malloc(320*200);// SDL_CreateRGBSurface(0, vga_width, vga_height, 8, 0, 0, 0, 0);
-	JE_clr256(VGAScreen);
+	rdpq_init();
+	rdpq_debug_start();
+	VGAScreenSeg = pbuf;
+	VGAScreen = VGAScreenSeg;
+	VGAScreen2 = pbuf2;
+	game_screen = pbuf3;
+//	JE_clr256(VGAScreen);
 
 	// Create the window with a temporary initial size, hidden until we set up the
 	// scaler and find the true window size
@@ -336,8 +329,11 @@ bool set_scaling_mode_by_name(const char *name)
 
 void JE_clr256(uint8_t *screen)
 {
+    surface_t surf = surface_make(screen, FMT_CI8, 320, 200, 320);
+	rdpq_attach_clear(&surf, NULL);
+	rdpq_detach(); 
 //	SDL_FillRect(screen, NULL, 0);
-memset(screen,0,320*200);
+//memset(screen,0,320*200);
 }
 surface_t *_surface;
 

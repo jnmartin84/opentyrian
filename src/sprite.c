@@ -520,9 +520,9 @@ void free_sprite2s(Sprite2_array *sprite2s)
 // does not clip on left or right edges of surface
 void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)
 {
-	blit_sprite2_clip(surface,x,y,sprite2s,index);
 #if 0
-	return;
+	blit_sprite2_clip(surface,x,y,sprite2s,index);
+#endif
 	//assert(surface->format->BitsPerPixel == 8);
 	Uint8 *             pixels =    (Uint8 *)surface/*->pixels*/ + (y * /*surface->pitch*/screenpitch) + x;
 	const Uint8 * const pixels_ll = (Uint8 *)surface/*->pixels*/,  // lower limit
@@ -556,7 +556,6 @@ void blit_sprite2(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsign
 			}
 		}
 	}
-#endif	
 }
 
 void blit_sprite2_clip(uint8_t *surface, int x, int y, Sprite2_array sprite2s, unsigned int index)

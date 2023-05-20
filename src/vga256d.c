@@ -82,11 +82,25 @@ void JE_rectangle(uint8_t *surface, int a, int b, int c, int d, int e) /* x1, y1
 		printf("!!! WARNING: Rectangle clipped: %d %d %d %d %d\n", a, b, c, d, e);
 	}
 }
+extern Palette palette;
 
 void fill_rectangle_xy(uint8_t *surface, int x, int y, int x2, int y2, Uint8 color)
 {
-	for(int ny=y; ny<y2;ny++) {
+#if 0	
+	if (((x + (y*320)) & 63) == 0) {
+		surface_t surf = surface_make(surface, FMT_CI8, 320, 200, 320);
+		surface_t subsurf = surface_make_sub(&surf, x, y, (x2-x),(y2-y));
+		rdpq_attach(&subsurf, NULL);
+		rdpq_clear(palette[color]);
+		rdpq_detach(); 
+	}
+	else
+#endif	
+	 {
+
+	for(size_t ny=y; ny<y2;ny++) {
 		memset(surface + (ny*screenpitch) + x, color, x2 - x);
+	}
 	}
 }
 

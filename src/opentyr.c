@@ -328,7 +328,7 @@ void setupMenu(void)
 		int oldFullscreenDisplay = fullscreen_display;
 		do
 		{
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -788,7 +788,7 @@ bool pop_input_queue(input_event_t **ev) {
 	}
 }
 
-void update_input_queue(void) {
+static void update_input_queue(int o) {
 	struct controller_data keys_pressed;
 	struct controller_data keys_released;
 
@@ -987,25 +987,10 @@ void update_input_queue(void) {
 
 volatile uint32_t timekeeping = 0;
 bool n64_ai_started = false;
-static void tickercb(int o) {
- 	if ((timekeeping & 31)==0)
-	{
-		update_input_queue();
-	}
-	timekeeping++;
-}
 
 uint32_t n64_GetTicks() {
 	// 1 tick == 1 ms
-	return timekeeping;
-}
-
-void n64_Delay(uint32_t duration)
-{
-	uint32_t start = n64_GetTicks();
-	while ( ((n64_GetTicks()) - start) < duration ) {
-		continue;
-	}
+	return timer_ticks() / 93750;
 }
 
 volatile struct AI_regs_s *AI_regs = (struct AI_regs_s *)0xA4500000;
@@ -1038,23 +1023,23 @@ void n64_startAudio(void)
 
 int main(int argc, char *argv[])
 {
-    console_init();
-    console_set_render_mode(RENDER_AUTOMATIC);
-    if (dfs_init( DFS_DEFAULT_LOCATION ) != DFS_ESUCCESS)
-    {
-        printf("Could not initialize filesystem!\n");
-        while(1);
-    }
-    controller_init();
+	console_init();
+	console_set_render_mode(RENDER_AUTOMATIC);
+	if (dfs_init( DFS_DEFAULT_LOCATION ) != DFS_ESUCCESS)
+	{
+   		printf("Could not initialize filesystem!\n");
+   		while(1);
+	}
+	controller_init();
 
 	timer_init();
 	timekeeping = 0;
 	/* timer_link_t* tick_timer = */
 	new_timer(
-		// 1 millisecond tics
-		TIMER_TICKS(1000),
+		// 30 updates per second
+		3125000,
 		TF_CONTINUOUS,
-		tickercb
+		update_input_queue
 	);
 
 	mt_srand(time(NULL));

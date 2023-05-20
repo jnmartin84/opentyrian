@@ -25,10 +25,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 #define SHORT(x)	((int16_t)(((uint16_t)(x)>>8)|((uint16_t)(x)<<8))) 
-#define LONG(x)     ((int32_t)((((uint32_t)(x)>>24)&0xff) | \
-					(((uint32_t)(x)<<8)&0xff0000) | \
+#define LONG(x)     ((int32_t)((((uint32_t)(x)>>24)) | \
+					((((uint32_t)(x)&0xff00)<<8)) | \
 					(((uint32_t)(x)>>8)&0xff00) | \
 					(((uint32_t)(x)<<24))))
 
@@ -124,10 +123,9 @@ typedef struct input_event_s {
 } input_event_t;
 
 void reset_input_queue(void);
-void update_input_queue(void);
 bool pop_input_queue(input_event_t **ev);
 uint32_t n64_GetTicks();
-void n64_Delay(uint32_t tick);
+void wait_ms(uint32_t tick);
 void setupMenu(void);
 #define SOUND_SAMPLE_RATE 11025
 //11025

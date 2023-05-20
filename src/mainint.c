@@ -159,7 +159,7 @@ void JE_outCharGlow(JE_word x, JE_word y, const char *s)
 					if (levelWarningDisplay)
 						JE_updateWarning(VGAScreen);
 
-					n64_Delay(16);
+					wait_ms(16);
 				} while (!(getDelayTicks() == 0 || ESCPressed));
 
 				JE_showVGA();
@@ -264,7 +264,7 @@ void JE_helpSystem(JE_byte startTopic)
 		do
 		{
 			// FIXME
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -506,7 +506,7 @@ static bool helpSystemPage(Uint8 *topic, bool *restart)
 			JE_showVGA();
 			JE_mouseReplace();
 // FIXME
-			n64_Delay(16);
+			wait_ms(16);
 
 			push_joysticks_as_keyboard();
 			service_SDL_events(false);
@@ -746,7 +746,7 @@ bool JE_loadScreen(void)
 		bool mouseMoved = false;
 		do
 		{
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -1047,7 +1047,7 @@ void JE_nextEpisode(void)
 		{
 			NETWORK_KEEP_ALIVE();
 
-			n64_Delay(16);
+			wait_ms(16);
 		} while (!JE_anyButton());
 	}
 
@@ -1221,7 +1221,7 @@ void JE_highScoreScreen(void)
 			JE_showVGA();
 			JE_mouseReplace();
 
-			n64_Delay(16);
+			wait_ms(16);
 
 			push_joysticks_as_keyboard();
 			service_SDL_events(false);
@@ -1395,7 +1395,7 @@ void JE_doInGameSetup(void)
 			network_update();
 			network_check();
 
-			n64_Delay(16);
+			wait_ms(16);
 		}
 	}
 #endif
@@ -1467,7 +1467,7 @@ void JE_doInGameSetup(void)
 				network_update();
 				network_check();
 
-				n64_Delay(16);
+				wait_ms(16);
 			}
 		}
 		else
@@ -1486,7 +1486,7 @@ void JE_doInGameSetup(void)
 			service_SDL_events(false);
 
 			network_check();
-			n64_Delay(16);
+			wait_ms(16);
 		}
 
 		VGAScreen = temp_surface; /* side-effect of game_screen */
@@ -1608,7 +1608,7 @@ JE_boolean JE_inGameSetup(void)
 		bool mouseMoved = false;
 		do
 		{
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -1996,7 +1996,7 @@ void JE_inGameHelp(void)
 		JE_showVGA();
 		JE_mouseReplace();
 
-		n64_Delay(16);
+		wait_ms(16);
 
 		push_joysticks_as_keyboard();
 		service_SDL_events(false);
@@ -3386,7 +3386,7 @@ void JE_pauseGame(void)
 			network_update();
 			network_check();
 
-			n64_Delay(16);
+			wait_ms(16);
 		}
 	}
 #endif
@@ -3438,7 +3438,7 @@ void JE_pauseGame(void)
 			service_SDL_events(false);
 
 			network_check();
-			n64_Delay(16);
+			wait_ms(16);
 		}
 	}
 #endif

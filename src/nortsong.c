@@ -73,7 +73,7 @@ void wait_delay(void)
 {
 	Sint32 delay = target - n64_GetTicks();
 	if (delay > 0)
-		n64_Delay(delay);
+		wait_ms(delay);
 }
 
 void service_wait_delay(void)
@@ -85,7 +85,7 @@ void service_wait_delay(void)
 		if (delay <= 0)
 			return;
 
-		n64_Delay(MIN(delay, SDL_POLL_INTERVAL));
+		wait_ms(MIN(delay, SDL_POLL_INTERVAL));
 	}
 }
 
@@ -106,7 +106,7 @@ void wait_delayorinput(void)
 		if (delay <= 0)
 			return;
 
-		n64_Delay(MIN(delay, SDL_POLL_INTERVAL));
+		wait_ms(MIN(delay, SDL_POLL_INTERVAL));
 	}
 }
 

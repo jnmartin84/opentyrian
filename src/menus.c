@@ -111,7 +111,7 @@ bool gameplaySelect(void)
 		do
 		{
 			// FIXME
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -310,7 +310,7 @@ bool episodeSelect(void)
 		bool mouseMoved = false;
 		do
 		{
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
@@ -459,7 +459,7 @@ bool difficultySelect(void)
 		bool mouseMoved = false;
 		do
 		{
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;

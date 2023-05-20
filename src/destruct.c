@@ -754,7 +754,7 @@ static void JE_introScreen(void)
 	{
 		// FIXME
 		service_SDL_events(false);
-		n64_Delay(16);
+		wait_ms(16);
 	}
 
 	fade_black(15);
@@ -806,7 +806,7 @@ static enum de_mode_t JE_modeSelect(void)
 		do
 		{
 			service_SDL_events(false);
-			n64_Delay(16);
+			wait_ms(16);
 		} while (!newkey);
 		// FIXME
 #if 0
@@ -1396,7 +1396,7 @@ static void JE_helpScreen(void)
 	{
 		// FIXME
 		service_SDL_events(true);
-		n64_Delay(16);
+		wait_ms(16);
 	} while (!newkey);
 
 	fade_black(15);
@@ -1421,7 +1421,7 @@ static void JE_pauseScreen(void)
 	{
 		// FIXME
 		service_SDL_events(true);
-		n64_Delay(16);
+		wait_ms(16);
 	} while (!newkey);
 
 	/* Restore current screen & volume*/

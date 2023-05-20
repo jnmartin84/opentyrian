@@ -140,11 +140,7 @@ void audioCallback(void *userdata, Uint8 *stream, int size)
 	}
 	else
 	{
-		for (int i = 0; i < samplesCount; ++i)
-		{
-			samples[(i*2)+0] = 0;
-			samples[(i*2)+1] = 0;
-		}
+		memset(samples, 0, samplesCount << 1);
 	}
 
 	Sint32 musicVolumeFactor = volumeFactorTable[musicVolume];

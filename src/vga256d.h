@@ -22,6 +22,8 @@
 #include "opentyr.h"
 
 //#include "SDL.h"
+#include <libdragon.h>
+#include "palette.h"
 
 void JE_pix(uint8_t *surface, int x, int y, JE_byte c);
 void JE_pix3(uint8_t *surface, int x, int y, JE_byte c);
@@ -31,13 +33,16 @@ void fill_rectangle_xy(uint8_t *, int x, int y, int x2, int y2, Uint8 color);
 
 void JE_barShade(uint8_t *surface, int a, int b, int c, int d);
 void JE_barBright(uint8_t *surface, int a, int b, int c, int d);
+#define screenwidth 320
+#define screenheight 200
+#define screenpixbytes 1
+#define screenpitch (screenwidth*screenpixbytes)
 
 static inline void fill_rectangle_wh(uint8_t *surface, int x, int y, uint w, uint h, Uint8 color)
 {
-	// FIXME
-	//SDL_Rect rect = { x, y, w, h };
-	//SDL_FillRect(surface, &rect, color);
-	
+	for(size_t ny=y; ny<y+h;ny++) {
+		memset(surface + (ny*screenpitch) + x, color, w);
+	}
 }
 
 void draw_segmented_gauge(uint8_t *surface, int x, int y, Uint8 color, uint segment_width, uint segment_height, uint segment_value, uint value);

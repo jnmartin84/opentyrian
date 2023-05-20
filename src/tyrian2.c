@@ -3377,7 +3377,7 @@ bool titleScreen(void)
 				return true;
 			}
 
-			n64_Delay(16);
+			wait_ms(16);
 
 			Uint16 oldMouseX = mouse_x;
 			Uint16 oldMouseY = mouse_y;
